@@ -1,12 +1,15 @@
 import { Request, Response, Router } from 'express';
 import HttpStatus from 'http-status';
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
+
 import 'express-async-errors';
 
-import { db } from '@utils';
+import { BodyValidation, db, Logger } from '@utils';
 
 import { UserRepositoryImpl } from '../repository';
 import { UserService, UserServiceImpl } from '../service';
+import { UpdateInputDTO } from '@domains/user/dto';
+import bcrypt from 'bcrypt';
 
 export const userRouter = Router();
 
@@ -44,4 +47,19 @@ userRouter.delete('/', async (req: Request, res: Response) => {
   await service.deleteUser(userId);
 
   return res.status(HttpStatus.OK);
+});
+
+userRouter.put('/update', BodyValidation(UpdateInputDTO), async (req: Request, res: Response) => {
+  // Obtener el userId del contexto (por ejemplo, desde el token JWT)
+  const { userId } = res.locals.context;
+  const { name, password, visibility } = req.body;
+
+  console.log(`${userId as string} ${name as string}, ${password as string}, ${visibility as string}`);
+
+  // Hashear la contraseña si está presente
+  const hashedPassword = (password as string) ? await bcrypt.hash(password, 10) : undefined;
+
+  await service.updateUser(userId, new UpdateInputDTO(name, hashedPassword, visibility));
+
+  res.status(HttpStatus.OK).send({ message: 'User updated successfully' });
 });
