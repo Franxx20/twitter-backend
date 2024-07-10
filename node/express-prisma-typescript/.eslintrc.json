@@ -3,18 +3,20 @@
     "browser": true,
     "es2022": true
   },
-  "extends": "standard-with-typescript",
   "overrides": [],
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
-    "project": ["tsconfig.json"]
+    "project": [
+      "tsconfig.json"
+    ]
   },
   "rules": {
     "@typescript-eslint/strict-boolean-expressions": [
       2,
-      {"allowNullableString":  true,
-        "allowNullableNumber":  true
+      {
+        "allowNullableString": true,
+        "allowNullableNumber": true
       }
     ],
     "@typescript-eslint/no-misused-promises": [
@@ -29,6 +31,9 @@
         "allowStaticOnly": true
       }
     ]
-  }
-
+  },
+  "extends": [
+    "standard-with-typescript",
+    "prettier"
+  ]
 }

@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:alpine
     container_name: db
-    restart: always
+    #    restart: always
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -12,7 +12,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
       interval: 1s
       timeout: 1s
       retries: 15
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
       target: dev
     container_name: server
-    restart: always
+    #    restart: always
     tty: true
     environment:
       - DATABASE_URL=${DOCKER_DATABASE_URL}
