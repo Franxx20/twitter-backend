@@ -1,4 +1,4 @@
-import { FollowerDTO, CreateFollowInputDTO } from '@domains/follower/dto';
+import { CreateFollowInputDTO, FollowerDTO } from '@domains/follower/dto';
 import { FollowerRepository } from '@domains/follower/repository/follower.repository';
 import { PrismaClient } from '@prisma/client';
 
@@ -42,5 +42,10 @@ export class FollowerRepositoryImpl implements FollowerRepository {
       },
     });
     return follow != null ? new FollowerDTO(follow) : null;
+  }
+
+  async getAllFollows(): Promise<FollowerDTO[]> {
+    // return Promise.resolve([]);
+    return await this.db.follow.findMany({});
   }
 }

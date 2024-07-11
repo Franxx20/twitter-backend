@@ -25,4 +25,9 @@ export class FollowerServiceImpl implements FollowerService {
     if (!follow) throw new NotFoundException('follow')
     return follow
   }
+
+  async getAllFollows(): Promise<FollowerDTO[]> {
+    // return Promise.resolve([]);
+    return await this.repository.getAllFollows();
+  }
 }

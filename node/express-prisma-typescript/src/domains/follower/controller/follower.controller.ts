@@ -30,6 +30,10 @@ followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
   });
 });
 
+followerRouter.get('/', async (req: Request, res: Response) => {
+  return res.status(HttpStatus.OK).json(await service.getAllFollows());
+});
+
 followerRouter.post('/unfollow/:user_id', async (req: Request, res: Response) => {
   const { userId: followerId } = res.locals.context;
   // eslint-disable-next-line @typescript-eslint/naming-convention

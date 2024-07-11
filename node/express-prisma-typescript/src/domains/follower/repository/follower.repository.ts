@@ -5,4 +5,5 @@ export interface FollowerRepository {
   delete: (followId: string) => Promise<void>;
   getById: (followId: string) => Promise<FollowerDTO | null>;
   getByFollowerId: (followerId: string) => Promise<FollowerDTO[]>;
+  getAllFollows: () => Promise<FollowerDTO[]>;
 }
