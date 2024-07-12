@@ -32,7 +32,7 @@ export class PostRepositoryImpl implements PostRepository {
     });
 
     const followedIds = userFollows.map((follow) => follow.followedId);
-    console.log(followedIds)
+    // console.log(followedIds);
 
     const posts = await this.db.post.findMany({
       where: {
@@ -92,5 +92,28 @@ export class PostRepositoryImpl implements PostRepository {
       },
     });
     return posts.map((post) => new PostDTO(post));
+  }
+
+  async isPostAuthorPublicOrFollowed(userId: string, authorId: string): Promise<boolean> {
+    const author = await this.db.user.findUnique({
+      where: {
+        id: authorId,
+      },
+    });
+
+    if (!author) return false;
+
+    if (author.visibility === Visibility.PUBLIC) return true;
+
+    if (author.visibility === Visibility.HIDDEN) return false;
+
+    const follow = await this.db.follow.findFirst({
+      where: {
+        followerId: userId,
+        followedId: authorId,
+      },
+    });
+
+    return follow !== null;
   }
 }

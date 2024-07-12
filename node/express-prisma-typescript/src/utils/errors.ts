@@ -26,6 +26,12 @@ export class ForbiddenException extends HttpException {
   }
 }
 
+export class InvalidUserException extends HttpException {
+  constructor() {
+    super(HttpStatus.FORBIDDEN, "You don't have permission to perform this action on user");
+  }
+}
+
 export class NotFoundException extends HttpException {
   constructor(model?: string) {
     super(HttpStatus.NOT_FOUND, `Not found.${model ? " Couldn't find " + model : ''}`);

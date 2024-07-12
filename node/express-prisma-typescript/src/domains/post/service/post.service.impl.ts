@@ -2,7 +2,7 @@ import { CreatePostInputDTO, PostDTO } from '../dto';
 import { PostRepository } from '../repository';
 import { PostService } from '.';
 import { validate } from 'class-validator';
-import { ForbiddenException, NotFoundException } from '@utils';
+import { ForbiddenException, InvalidUserException, NotFoundException } from '@utils';
 import { CursorPagination } from '@types';
 
 export class PostServiceImpl implements PostService {
@@ -23,7 +23,13 @@ export class PostServiceImpl implements PostService {
   async getPost(userId: string, postId: string): Promise<PostDTO> {
     // TODO: validate that the author has public profile or the user follows the author
     const post = await this.repository.getById(postId);
+
     if (!post) throw new NotFoundException('post');
+    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, post.authorId);
+    if (!result) {
+      throw new InvalidUserException();
+    }
+
     return post;
   }
 
@@ -34,6 +40,10 @@ export class PostServiceImpl implements PostService {
 
   async getPostsByAuthor(userId: any, authorId: string): Promise<PostDTO[]> {
     // TODO: throw exception when the author has a private profile and the user doesn't follow them
+    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, authorId);
+    if (!result) {
+      throw new InvalidUserException();
+    }
     return await this.repository.getByAuthorId(authorId);
   }
 }

@@ -4,7 +4,7 @@ import HttpStatus from 'http-status';
 
 import 'express-async-errors';
 
-import { BodyValidation, db, Logger } from '@utils';
+import { BodyValidation, db } from '@utils';
 
 import { UserRepositoryImpl } from '../repository';
 import { UserService, UserServiceImpl } from '../service';

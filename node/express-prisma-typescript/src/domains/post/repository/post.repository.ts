@@ -7,4 +7,6 @@ export interface PostRepository {
   delete: (postId: string) => Promise<void>;
   getById: (postId: string) => Promise<PostDTO | null>;
   getByAuthorId: (authorId: string) => Promise<PostDTO[]>;
+  isPostAuthorPublicOrFollowed: (userId: string, authorId: string) => Promise<boolean>;
+
 }
