@@ -3,7 +3,7 @@ import HttpStatus from 'http-status';
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors';
 
-import { db, BodyValidation } from '@utils';
+import {db, BodyValidation, NotFoundException} from '@utils';
 
 import { ReactionRepositoryImpl } from '../repository';
 import { ReactionService, ReactionServiceImpl } from '@domains/reaction/service';
@@ -21,6 +21,18 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
 
 // Deberia checkear que el usuario no le de like
 // o Retweet al mismo post mas de una vez?
+
+reactionRouter.get('/likes/user/:userId', async (req: Request, res: Response) => {
+  const { userId:authorId } = req.params
+  const {authorId} = res.locals.context;
+
+  const reactions = await this.service.getAllLikesByAuthorId(userId,authorId);
+  if(!reactions)
+    throw new NotFoundException("reactions not found")
+
+  return res.status(HttpStatus.OK).json(reactions);
+})
+
 reactionRouter.post('/:post_id', BodyValidation(ReactionInputDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const data = req.body;
