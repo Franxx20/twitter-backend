@@ -15,7 +15,7 @@ export class PostRepositoryImpl implements PostRepository {
         ...data,
       },
     });
-    console.log(post, new PostDTO(post));
+    // console.log(post, new PostDTO(post));
     return new PostDTO(post);
   }
 
