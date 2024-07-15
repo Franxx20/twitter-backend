@@ -7,5 +7,5 @@ export interface CommentService {
 
   getComment: (userId: string, postId: string) => Promise<CommentDTO>;
   getAllCommentsFromPost: (userId: string, postId: string) => Promise<CommentDTO[]>;
-  getAllCommentsFromUser: (userId: string) => Promise<CommentDTO[]>;
+  getAllCommentsFromUser: (userId: string, authorId: string) => Promise<CommentDTO[]>;
 }

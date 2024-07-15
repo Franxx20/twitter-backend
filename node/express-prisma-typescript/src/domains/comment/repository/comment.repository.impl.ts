@@ -31,17 +31,18 @@ export class CommentRepositoryImpl implements CommentRepository {
     const comments = await this.db.post.findMany({
       where: {
         parentPostId,
-        // authorId:authorId,
+        // authorId,
       },
     });
+    console.log(comments)
 
     return comments !== null ? comments.map((comment) => new CommentDTO(comment)) : null;
   }
 
-  async getAllCommentsFromUser(userId: string): Promise<CommentDTO[] | null> {
+  async getAllCommentsFromUser(authorId: string): Promise<CommentDTO[] | null> {
     const comments = await this.db.post.findMany({
       where: {
-        authorId: userId,
+        authorId,
         NOT: {
           parentPostId: null,
         },

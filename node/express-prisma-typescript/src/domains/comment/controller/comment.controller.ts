@@ -13,11 +13,32 @@ export const commentRouter = Router();
 // User dependency injection
 const service: CommentService = new CommentServiceImpl(new CommentRepositoryImpl(db));
 
-commentRouter.get('/:postId', async (req: Request, res: Response) => {
+commentRouter.get('/:commentId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context;
+  const { commentId } = req.params;
+
+  const comment = await service.getComment(userId, commentId);
+
+  return res.status(HttpStatus.OK).json(comment);
+});
+
+commentRouter.get('/post/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const { postId } = req.params;
 
+  console.log("buscando todos los comentarios de un post")
   const comments = await service.getAllCommentsFromPost(userId, postId);
+  console.log(comments)
+
+  return res.status(HttpStatus.OK).json(comments);
+});
+
+commentRouter.get('/author/:authorId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context;
+  const { authorId } = req.params;
+
+  console.log("buscando todos los comentarios de un authorId")
+  const comments = await service.getAllCommentsFromUser(userId, authorId);
 
   return res.status(HttpStatus.OK).json(comments);
 });

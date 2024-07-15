@@ -35,8 +35,12 @@ export class CommentServiceImpl implements CommentService {
     return comment;
   }
 
-  async getAllCommentsFromUser(userId: string): Promise<CommentDTO[]> {
-    const comments = await this.repository.getAllCommentsFromUser(userId);
+  async getAllCommentsFromUser(userId: string, authorId: string): Promise<CommentDTO[]> {
+    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, authorId);
+    console.log(result);
+    if (!result) throw new InvalidUserException();
+
+    const comments = await this.repository.getAllCommentsFromUser(authorId);
     if (!comments) throw new NotFoundException('comments');
 
     return comments;
