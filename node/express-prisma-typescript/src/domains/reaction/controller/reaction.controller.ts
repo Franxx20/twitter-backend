@@ -7,7 +7,7 @@ import { db, BodyValidation } from '@utils';
 
 import { ReactionRepositoryImpl } from '../repository';
 import { ReactionService, ReactionServiceImpl } from '@domains/reaction/service';
-import { CreateReactionDTO, ReactionInputDTO } from '@domains/reaction/dto';
+import { CreateReactionDTO, ReactionDeleteDTO, ReactionInputDTO } from '@domains/reaction/dto';
 import { validate } from 'class-validator';
 
 export const reactionRouter = Router();
@@ -47,7 +47,7 @@ reactionRouter.delete('/:post_id', BodyValidation(ReactionInputDTO), async (req:
 
   const { post_id: postId } = req.params;
 
-  await service.deleteReaction(userId, postId, data.action);
+  await service.deleteReaction(userId, new ReactionDeleteDTO(postId, data));
 
   return res.status(HttpStatus.OK).json({ message: `Deleted reaction from ${postId}` });
 });

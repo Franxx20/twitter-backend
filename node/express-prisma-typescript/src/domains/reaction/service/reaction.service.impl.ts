@@ -1,5 +1,4 @@
-import { PrismaClient, ReactionAction } from '@prisma/client';
-import { ReactionInputDTO, ReactionDTO, CreateReactionDTO } from '@domains/reaction/dto';
+import {  ReactionDTO, CreateReactionDTO, ReactionDeleteDTO } from '@domains/reaction/dto';
 import { ReactionRepository } from '@domains/reaction/repository';
 import { ReactionService } from '@domains/reaction/service/reaction.service';
 import { ForbiddenException, NotFoundException } from '@utils';
@@ -13,12 +12,12 @@ export class ReactionServiceImpl implements ReactionService {
     return await this.repository.create(userId, data);
   }
 
-  async deleteReaction(userId: string, postId: string, action: ReactionAction): Promise<void> {
-    const reactions = await this.repository.getByPostId(postId);
+  async deleteReaction(userId: string, reactionDeleteDTO: ReactionDeleteDTO): Promise<void> {
+    const reactions = await this.repository.getByPostId(reactionDeleteDTO.postId);
     if (!reactions) throw new NotFoundException('reaction');
-    if (reactions[0].authorId !== userId) throw new ForbiddenException();
+    if (reactions[0].authorId !== userId || reactions.length === 0) throw new ForbiddenException();
     for (const reaction of reactions) {
-      if (reaction.action === action) await this.repository.delete(reaction.id);
+      if (reaction.action === reactionDeleteDTO.action) await this.repository.delete(reaction.id);
     }
     await Promise.resolve();
   }
@@ -34,10 +33,10 @@ export class ReactionServiceImpl implements ReactionService {
   }
 
   async getReactionsByUser(userId: string): Promise<ReactionDTO[]> {
-    return Promise.resolve([]);
+    return await Promise.resolve([]);
   }
 
   async getReactionsFromPost(postId: string): Promise<ReactionDTO[]> {
-    return Promise.resolve([]);
+    return await Promise.resolve([]);
   }
 }

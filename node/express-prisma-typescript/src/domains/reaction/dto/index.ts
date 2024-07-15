@@ -23,10 +23,19 @@ export class ReactionInputDTO {
   action!: ReactionAction;
 }
 
-export class userIdBodyDTO {
+export class ReactionDeleteDTO {
+  constructor(postId: string, reaction: ReactionInputDTO) {
+    this.postId = postId;
+    this.action = reaction.action;
+  }
+
+  @IsEnum(ReactionAction)
   @IsNotEmpty()
+  action!: ReactionAction;
+
   @IsString()
-  userId!: string;
+  @IsNotEmpty()
+  postId!: string;
 }
 
 export class CreateReactionDTO {

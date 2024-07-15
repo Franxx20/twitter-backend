@@ -2,19 +2,30 @@ import { PrismaClient, Visibility } from '@prisma/client';
 
 import { ReactionRepository } from '.';
 import { ReactionDTO, CreateReactionDTO } from '../dto';
-import * as console from 'node:console';
+import { ForbiddenException } from '@utils';
 
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor(private readonly db: PrismaClient) {}
 
   async create(authorId: string, data: CreateReactionDTO): Promise<ReactionDTO> {
+    const oldReaction = await this.db.reaction.findFirst({
+      where: {
+        postId: data.postId,
+        action: data.action,
+      },
+    });
+
+    if (oldReaction) {
+      throw new ForbiddenException();
+    }
+
     const reaction = await this.db.reaction.create({
       data: {
         authorId,
         ...data,
       },
     });
-    console.log(reaction, new ReactionDTO(reaction));
+    // console.log(reaction, new ReactionDTO(reaction));
     return new ReactionDTO(reaction);
   }
 
