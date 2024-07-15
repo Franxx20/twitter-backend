@@ -7,12 +7,11 @@ import * as console from 'node:console';
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async create(userId: string, data: CreateReactionDTO): Promise<ReactionDTO> {
+  async create(authorId: string, data: CreateReactionDTO): Promise<ReactionDTO> {
     const reaction = await this.db.reaction.create({
       data: {
-        authorId: userId,
-        postId: data.postId,
-        action: data.action,
+        authorId,
+        ...data,
       },
     });
     console.log(reaction, new ReactionDTO(reaction));

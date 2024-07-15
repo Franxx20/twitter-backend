@@ -19,11 +19,18 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
 // both should be stored in the same table and
 // using the endpoints POST api/reaction/:post_id and DELETE api/reaction/:post_id.
 
+// Deberia checkear que el usuario no le de like
+// o Retweet al mismo post mas de una vez?
 reactionRouter.post('/:post_id', BodyValidation(ReactionInputDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const data = req.body;
 
+  console.log(data);
+  console.log(userId);
+
   const { post_id: postId } = req.params;
+
+  console.log(postId);
 
   // add user_id to validate
   const createReactionDTO = new CreateReactionDTO(postId, data);
@@ -32,4 +39,15 @@ reactionRouter.post('/:post_id', BodyValidation(ReactionInputDTO), async (req: R
   const reaction = await service.createReaction(userId, createReactionDTO);
 
   return res.status(HttpStatus.OK).json(reaction);
+});
+
+reactionRouter.delete('/:post_id', BodyValidation(ReactionInputDTO), async (req: Request, res: Response) => {
+  const { userId } = res.locals.context;
+  const data = req.body;
+
+  const { post_id: postId } = req.params;
+
+  await service.deleteReaction(userId, postId, data.action);
+
+  return res.status(HttpStatus.OK).json({ message: `Deleted reaction from ${postId}` });
 });
