@@ -7,6 +7,8 @@ export interface CommentRepository {
 
   getById: (postId: string) => Promise<CommentDTO | null>;
   getAllCommentsFromPost: (userId: string, postId: string) => Promise<CommentDTO[] | null>;
+  getAllCommentsFromUser: (userId: string) => Promise<CommentDTO[] | null>;
 
   isPostAuthorPublicOrFollowed: (userId: string, postId: string) => Promise<boolean>;
+
 }

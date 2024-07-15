@@ -1,5 +1,3 @@
-import { PrismaClient, Visibility } from '@prisma/client';
-
 import { CommentRepository } from '@domains/comment/repository/comment.repository';
 
 import { CommentService } from '@domains/comment/service/comment.service';
@@ -25,9 +23,29 @@ export class CommentServiceImpl implements CommentService {
     await this.repository.delete(postId);
   }
 
+  async getComment(userId: string, postId: string): Promise<CommentDTO> {
+    // return Promise.resolve(undefined);
+    const comment = await this.repository.getById(postId);
+    if (!comment) throw new NotFoundException('comment');
+
+    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, comment.authorId);
+    console.log(result);
+    if (!result) throw new InvalidUserException();
+
+    return comment;
+  }
+
+  async getAllCommentsFromUser(userId: string): Promise<CommentDTO[]> {
+    const comments = await this.repository.getAllCommentsFromUser(userId);
+    if (!comments) throw new NotFoundException('comments');
+
+    return comments;
+  }
+
   async getAllCommentsFromPost(userId: string, postId: string): Promise<CommentDTO[]> {
     const post = await this.repository.getById(postId);
     if (!post) throw new NotFoundException('post');
+
     const result = await this.repository.isPostAuthorPublicOrFollowed(userId, post.authorId);
     console.log(result);
     if (!result) throw new InvalidUserException();
