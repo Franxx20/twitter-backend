@@ -74,8 +74,13 @@ model Post {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value
 
-  author   User       @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
-  Reaction Reaction[]
+  parentPost   Post?   @relation("PostToPost", fields: [parentPostId], references: [id])
+  parentPostId String? @db.Uuid
+
+  comments Post[] @relation("PostToPost")
+
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+  reactions Reaction[] // Changed to plural to denote relation
 }
 
 model Follow {
