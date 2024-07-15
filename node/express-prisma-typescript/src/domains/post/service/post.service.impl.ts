@@ -15,6 +15,7 @@ export class PostServiceImpl implements PostService {
 
   async deletePost(userId: string, postId: string): Promise<void> {
     const post = await this.repository.getById(postId);
+    // solo se puede borrar un post si el userId es del autor
     if (!post) throw new NotFoundException('post');
     if (post.authorId !== userId) throw new ForbiddenException();
     await this.repository.delete(postId);

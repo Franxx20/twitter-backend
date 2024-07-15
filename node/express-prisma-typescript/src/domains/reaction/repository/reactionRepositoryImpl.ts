@@ -1,17 +1,18 @@
-import { PrismaClient, ReactionAction } from '@prisma/client';
+import { PrismaClient, Visibility } from '@prisma/client';
 
 import { ReactionRepository } from '.';
-import { CreateReactionDTO, ReactionDTO } from '../dto';
+import { ReactionDTO, CreateReactionDTO } from '../dto';
+import * as console from 'node:console';
 
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async create(authorId: string, data: CreateReactionDTO): Promise<ReactionDTO> {
-    // return Promise.resolve(undefined);
+  async create(userId: string, data: CreateReactionDTO): Promise<ReactionDTO> {
     const reaction = await this.db.reaction.create({
       data: {
-        authorId,
-        ...data,
+        authorId: userId,
+        postId: data.postId,
+        action: data.action,
       },
     });
     console.log(reaction, new ReactionDTO(reaction));
@@ -28,25 +29,30 @@ export class ReactionRepositoryImpl implements ReactionRepository {
 
   // make better checks later
   async getAll(): Promise<ReactionDTO[]> {
-    // return await this.db.reaction.findMany({});
     const reactions = await this.db.reaction.findMany({});
 
-    return reactions;
+    return reactions.map((reaction) => new ReactionDTO(reaction));
   }
 
   async getById(reactionId: string): Promise<ReactionDTO | null> {
-    const reaction 
+    const reaction = await this.db.reaction.findUnique({
+      where: {
+        id: reactionId,
+      },
+    });
+
+    return reaction != null ? new ReactionDTO(reaction) : null;
   }
 
   async getByAuthorId(authorId: string): Promise<ReactionDTO[] | null> {
-    // return Promise.resolve(undefined);
     const reactions = await this.db.reaction.findMany({
       where: {
         authorId,
       },
     });
 
-    return reactions;
+    // deberia retonar una lista vacia en vez de nulos?
+    return reactions != null ? reactions.map((reaction) => new ReactionDTO(reaction)) : null;
   }
 
   async getByPostId(postId: string): Promise<ReactionDTO[] | null> {
@@ -55,6 +61,30 @@ export class ReactionRepositoryImpl implements ReactionRepository {
         postId,
       },
     });
-    return reactions;
+    return reactions != null ? reactions.map((reaction) => new ReactionDTO(reaction)) : null;
+  }
+
+  // check this later
+  async isReactionAuthorPublicOrFollowed(userId: string, authorId: string): Promise<boolean> {
+    const author = await this.db.user.findUnique({
+      where: {
+        id: authorId,
+      },
+    });
+
+    if (!author) return false;
+
+    if (author.visibility === Visibility.PUBLIC) return true;
+
+    if (author.visibility === Visibility.HIDDEN) return false;
+
+    const follow = await this.db.follow.findFirst({
+      where: {
+        followerId: userId,
+        followedId: authorId,
+      },
+    });
+
+    return follow !== null;
   }
 }

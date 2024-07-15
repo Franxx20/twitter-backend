@@ -1,5 +1,5 @@
-import { Reaction, ReactionAction } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { Reaction, ReactionAction } from '@prisma/client';
 
 export class ReactionDTO {
   constructor(reaction: Reaction) {
@@ -17,12 +17,29 @@ export class ReactionDTO {
   createdAt: Date;
 }
 
-export class CreateReactionDTO {
-  @IsString()
+export class ReactionInputDTO {
+  @IsEnum(ReactionAction)
   @IsNotEmpty()
-  postId!: string;
+  action!: ReactionAction;
+}
+
+export class userIdBodyDTO {
+  @IsNotEmpty()
+  @IsString()
+  userId!: string;
+}
+
+export class CreateReactionDTO {
+  constructor(postId: string, reaction: ReactionInputDTO) {
+    this.postId = postId;
+    this.action = reaction.action;
+  }
 
   @IsEnum(ReactionAction)
   @IsNotEmpty()
   action!: ReactionAction;
+
+  @IsString()
+  @IsNotEmpty()
+  postId!: string;
 }
