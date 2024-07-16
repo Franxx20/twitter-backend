@@ -10,6 +10,7 @@ import { UserRepositoryImpl } from '../repository';
 import { UserService, UserServiceImpl } from '../service';
 import { UpdateInputDTO } from '@domains/user/dto';
 import bcrypt from 'bcrypt';
+import { Constants } from '@utils';
 
 export const userRouter = Router();
 
@@ -57,7 +58,7 @@ userRouter.put('/update', BodyValidation(UpdateInputDTO), async (req: Request, r
   console.log(`${userId as string} ${name as string}, ${password as string}, ${visibility as string}`);
 
   // Hashear la contraseña si está presente
-  const hashedPassword = (password as string) ? await bcrypt.hash(password, 10) : undefined;
+  const hashedPassword = (password as string) ? await bcrypt.hash(password, Constants.SALT_OR_ROUNDS) : undefined;
 
   await service.updateUser(userId, new UpdateInputDTO(name, hashedPassword, visibility));
 
