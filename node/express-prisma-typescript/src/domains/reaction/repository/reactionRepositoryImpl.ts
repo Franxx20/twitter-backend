@@ -1,4 +1,4 @@
-import { PrismaClient, Visibility } from '@prisma/client';
+import { PrismaClient, ReactionAction, Visibility } from '@prisma/client';
 
 import { ReactionRepository } from '.';
 import { ReactionDTO, CreateReactionDTO } from '../dto';
@@ -38,23 +38,23 @@ export class ReactionRepositoryImpl implements ReactionRepository {
   }
 
   // make better checks later
-  async getAll(): Promise<ReactionDTO[]> {
+  async getAllReactions(): Promise<ReactionDTO[]> {
     const reactions = await this.db.reaction.findMany({});
 
     return reactions.map((reaction) => new ReactionDTO(reaction));
   }
 
-  async getById(reactionId: string): Promise<ReactionDTO | null> {
+  async getByReactionId(reactionId: string): Promise<ReactionDTO | null> {
     const reaction = await this.db.reaction.findUnique({
       where: {
         id: reactionId,
       },
     });
 
-    return reaction != null ? new ReactionDTO(reaction) : null;
+    return reaction !== null ? new ReactionDTO(reaction) : null;
   }
 
-  async getByAuthorId(authorId: string): Promise<ReactionDTO[] | null> {
+  async getAllReactionsFromUser(authorId: string): Promise<ReactionDTO[]> {
     const reactions = await this.db.reaction.findMany({
       where: {
         authorId,
@@ -62,16 +62,42 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     });
 
     // deberia retonar una lista vacia en vez de nulos?
-    return reactions != null ? reactions.map((reaction) => new ReactionDTO(reaction)) : null;
+    // return reactions != null ? reactions.map((reaction) => new ReactionDTO(reaction)) : null;
+    return reactions.map((reaction) => new ReactionDTO(reaction));
   }
 
-  async getByPostId(postId: string): Promise<ReactionDTO[] | null> {
+  async getAllReactionsFromPost(postId: string): Promise<ReactionDTO[]> {
     const reactions = await this.db.reaction.findMany({
       where: {
         postId,
       },
     });
-    return reactions != null ? reactions.map((reaction) => new ReactionDTO(reaction)) : null;
+    // return reactions != null ? reactions.map((reaction) => new ReactionDTO(reaction)) : null;
+    return reactions.map((reaction) => new ReactionDTO(reaction));
+  }
+
+  async getAllLikesFromUser(userId: string): Promise<ReactionDTO[]> {
+    // return Promise.resolve([]);
+    const likes = await this.db.reaction.findMany({
+      where: {
+        authorId: userId,
+        action: ReactionAction.LIKE,
+      },
+    });
+
+    return likes.map((like) => new ReactionDTO(like));
+  }
+
+  async getAllRetweetsFromUser(userId: string): Promise<ReactionDTO[]> {
+    // return Promise.resolve([]);
+    const retweets = await this.db.reaction.findMany({
+      where: {
+        authorId: userId,
+        action: ReactionAction.RETWEET,
+      },
+    });
+
+    return retweets.map((retweet) => new ReactionDTO(retweet));
   }
 
   // check this later
@@ -96,5 +122,18 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     });
 
     return follow !== null;
+  }
+
+  async getAuthorIdOfPost(postId: string): Promise<string | null> {
+    const authorId = await this.db.post.findUnique({
+      where: {
+        id: postId,
+      },
+      select: {
+        authorId: true,
+      },
+    });
+    if (!authorId) return null;
+    return authorId.authorId;
   }
 }

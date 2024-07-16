@@ -27,19 +27,16 @@ export class CommentRepositoryImpl implements CommentRepository {
     });
   }
 
-  async getAllCommentsFromPost(authorId: string, parentPostId: string): Promise<CommentDTO[] | null> {
+  async getAllCommentsFromPost(parentPostId: string): Promise<CommentDTO[]> {
     const comments = await this.db.post.findMany({
       where: {
         parentPostId,
-        // authorId,
       },
     });
-    console.log(comments)
-
-    return comments !== null ? comments.map((comment) => new CommentDTO(comment)) : null;
+    return comments.map((comment) => new CommentDTO(comment));
   }
 
-  async getAllCommentsFromUser(authorId: string): Promise<CommentDTO[] | null> {
+  async getAllCommentsFromUser(authorId: string): Promise<CommentDTO[]> {
     const comments = await this.db.post.findMany({
       where: {
         authorId,
@@ -48,7 +45,7 @@ export class CommentRepositoryImpl implements CommentRepository {
         },
       },
     });
-    return comments !== null ? comments.map((comment) => new CommentDTO(comment)) : null;
+    return comments.map((comment) => new CommentDTO(comment));
   }
 
   async getById(postId: string): Promise<CommentDTO | null> {

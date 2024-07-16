@@ -26,18 +26,18 @@ commentRouter.get('/post/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const { postId } = req.params;
 
-  console.log("buscando todos los comentarios de un post")
+  console.log('buscando todos los comentarios de un post');
   const comments = await service.getAllCommentsFromPost(userId, postId);
-  console.log(comments)
+  console.log(comments);
 
   return res.status(HttpStatus.OK).json(comments);
 });
 
-commentRouter.get('/author/:authorId', async (req: Request, res: Response) => {
+commentRouter.get('/user/:userId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
-  const { authorId } = req.params;
+  const { userId: authorId } = req.params;
 
-  console.log("buscando todos los comentarios de un authorId")
+  console.log('buscando todos los comentarios de un authorId');
   const comments = await service.getAllCommentsFromUser(userId, authorId);
 
   return res.status(HttpStatus.OK).json(comments);

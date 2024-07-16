@@ -3,12 +3,11 @@ import HttpStatus from 'http-status';
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors';
 
-import {db, BodyValidation, NotFoundException} from '@utils';
+import { db, BodyValidation} from '@utils';
 
 import { ReactionRepositoryImpl } from '../repository';
 import { ReactionService, ReactionServiceImpl } from '@domains/reaction/service';
 import { CreateReactionDTO, ReactionDeleteDTO, ReactionInputDTO } from '@domains/reaction/dto';
-import { validate } from 'class-validator';
 
 export const reactionRouter = Router();
 
@@ -23,32 +22,29 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
 // o Retweet al mismo post mas de una vez?
 
 reactionRouter.get('/likes/user/:userId', async (req: Request, res: Response) => {
-  const { userId:authorId } = req.params
-  const {authorId} = res.locals.context;
+  const { userId: authorId } = req.params;
+  const { userId } = res.locals.context;
 
-  const reactions = await this.service.getAllLikesByAuthorId(userId,authorId);
-  if(!reactions)
-    throw new NotFoundException("reactions not found")
+  const likes = await service.getAllLikesFromUser(userId, authorId);
 
-  return res.status(HttpStatus.OK).json(reactions);
-})
+  return res.status(HttpStatus.OK).json(likes);
+});
+
+reactionRouter.get('/retweets/user/:userId', async (req: Request, res: Response) => {
+  const { userId: authorId } = req.params;
+  const { userId } = res.locals.context;
+
+  const retweets = await service.getAllRetweetsFromUser(userId, authorId);
+
+  return res.status(HttpStatus.OK).json(retweets);
+});
 
 reactionRouter.post('/:post_id', BodyValidation(ReactionInputDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const data = req.body;
-
-  console.log(data);
-  console.log(userId);
-
   const { post_id: postId } = req.params;
 
-  console.log(postId);
-
-  // add user_id to validate
-  const createReactionDTO = new CreateReactionDTO(postId, data);
-  await validate(createReactionDTO);
-
-  const reaction = await service.createReaction(userId, createReactionDTO);
+  const reaction = await service.createReaction(userId, new CreateReactionDTO(postId, data));
 
   return res.status(HttpStatus.OK).json(reaction);
 });

@@ -41,7 +41,7 @@ export class CommentServiceImpl implements CommentService {
     if (!result) throw new InvalidUserException();
 
     const comments = await this.repository.getAllCommentsFromUser(authorId);
-    if (!comments) throw new NotFoundException('comments');
+    if (!comments.length) throw new NotFoundException('comments');
 
     return comments;
   }
@@ -54,9 +54,9 @@ export class CommentServiceImpl implements CommentService {
     console.log(result);
     if (!result) throw new InvalidUserException();
 
-    const comments = await this.repository.getAllCommentsFromPost(userId, postId);
+    const comments = await this.repository.getAllCommentsFromPost(postId);
     console.log(comments);
-    if (!comments) throw new NotFoundException('no comments found');
+    if (!comments.length) throw new NotFoundException('no comments found');
     return comments;
   }
 }
