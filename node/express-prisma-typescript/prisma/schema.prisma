@@ -53,6 +53,8 @@ model User {
 
   visibility Visibility @default(PUBLIC)
 
+  profilePicture String?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value

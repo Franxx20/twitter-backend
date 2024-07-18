@@ -3,6 +3,7 @@ import { PrismaClient, Visibility } from '@prisma/client';
 import { CommentRepository } from '@domains/comment/repository/comment.repository';
 import { CreatePostInputDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
+import { OffsetPagination } from '@types';
 
 export class CommentRepositoryImpl implements CommentRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -27,10 +28,18 @@ export class CommentRepositoryImpl implements CommentRepository {
     });
   }
 
-  async getAllCommentsFromPost(parentPostId: string): Promise<CommentDTO[]> {
+  async getAllCommentsFromPost(postId: string, options: OffsetPagination): Promise<CommentDTO[]> {
     const comments = await this.db.post.findMany({
+      take: options.limit ? options.limit : undefined,
+      skip: options.skip ? options.skip : undefined,
+      // orderBy:[
+      //   {
+      //     reaction
+      //   }
+      //
+      // ],
       where: {
-        parentPostId,
+        id: postId,
       },
     });
     return comments.map((comment) => new CommentDTO(comment));
@@ -66,7 +75,7 @@ export class CommentRepositoryImpl implements CommentRepository {
       },
     });
 
-    if (!author) {
+    if (author === null) {
       console.log(`authorId ${authorId} not found`);
       return false;
     }

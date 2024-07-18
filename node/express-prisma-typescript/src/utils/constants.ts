@@ -30,4 +30,11 @@ export class Constants {
   static TOKEN_SECRET: string = process.env.TOKEN_SECRET ?? 'secret';
 
   static SALT_OR_ROUNDS: number = Number(process.env.SALT_OR_ROUNDS) ?? 10;
+
+  static BUCKET_NAME: string = process.env.BUCKET_NAME ?? '';
+  static BUCKET_REGION: string = process.env.BUCKET_REGION ?? '';
+  static ACCESS_KEY: string = process.env.ACCESS_KEY ?? '';
+  static SECRET_ACCESS_KEY: string = process.env.SECRET_ACCESS_KEY ?? ':';
+
+  static PRE_SIGNED_URL_LIFETIME: number = 60 * 5;
 }

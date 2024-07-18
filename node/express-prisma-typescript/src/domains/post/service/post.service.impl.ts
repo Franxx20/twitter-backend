@@ -1,8 +1,9 @@
-import { CreatePostInputDTO, PostDTO } from '../dto';
+import { CreatePostInputDTO, PostDTO, PresignedUrl } from '../dto';
+
 import { PostRepository } from '../repository';
 import { PostService } from '.';
 import { validate } from 'class-validator';
-import { ForbiddenException, InvalidUserException, NotFoundException } from '@utils';
+import { ForbiddenException, InvalidUserException, NotFoundException, generatePreSignedUrls } from '@utils';
 import { CursorPagination } from '@types';
 
 export class PostServiceImpl implements PostService {
@@ -10,6 +11,12 @@ export class PostServiceImpl implements PostService {
 
   async createPost(userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data);
+
+    if (data.images !== undefined) {
+      const urls: PresignedUrl[] = await generatePreSignedUrls(data.images);
+      console.log(urls);
+      data.images = urls.map((url) => url.key);
+    }
     return await this.repository.create(userId, data);
   }
 

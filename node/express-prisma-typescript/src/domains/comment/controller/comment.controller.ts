@@ -22,12 +22,13 @@ commentRouter.get('/:commentId', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(comment);
 });
 
-commentRouter.get('/post/:postId', async (req: Request, res: Response) => {
+commentRouter.get('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const { postId } = req.params;
+  const { limit, skip } = req.query as Record<string, string>;
 
   console.log('buscando todos los comentarios de un post');
-  const comments = await service.getAllCommentsFromPost(userId, postId);
+  const comments = await service.getAllCommentsFromPostPaginated(userId, postId, { limit: Number(limit), skip: Number(skip) });
   console.log(comments);
 
   return res.status(HttpStatus.OK).json(comments);

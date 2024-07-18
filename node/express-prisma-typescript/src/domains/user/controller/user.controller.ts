@@ -8,9 +8,7 @@ import { BodyValidation, db } from '@utils';
 
 import { UserRepositoryImpl } from '../repository';
 import { UserService, UserServiceImpl } from '../service';
-import { UpdateInputDTO } from '@domains/user/dto';
-import bcrypt from 'bcrypt';
-import { Constants } from '@utils';
+import { UserUpdateInputDTO } from '@domains/user/dto';
 
 export const userRouter = Router();
 
@@ -50,17 +48,14 @@ userRouter.delete('/', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK);
 });
 
-userRouter.put('/update', BodyValidation(UpdateInputDTO), async (req: Request, res: Response) => {
+userRouter.put('/update', BodyValidation(UserUpdateInputDTO), async (req: Request, res: Response) => {
   // Obtener el userId del contexto (por ejemplo, desde el token JWT)
   const { userId } = res.locals.context;
-  const { name, password, visibility } = req.body;
+  const { name, password, visibility, profilePicture } = req.body;
 
   console.log(`${userId as string} ${name as string}, ${password as string}, ${visibility as string}`);
 
-  // Hashear la contraseña si está presente
-  const hashedPassword = (password as string) ? await bcrypt.hash(password, Constants.SALT_OR_ROUNDS) : undefined;
-
-  await service.updateUser(userId, new UpdateInputDTO(name, hashedPassword, visibility));
+  await service.updateUser(userId, new UserUpdateInputDTO(name, password, visibility, profilePicture));
 
   res.status(HttpStatus.OK).send({ message: 'User updated successfully' });
 });

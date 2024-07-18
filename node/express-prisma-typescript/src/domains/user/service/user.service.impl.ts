@@ -1,30 +1,40 @@
 import { NotFoundException } from '@utils/errors';
 import { OffsetPagination } from 'types';
-import { UpdateInputDTO, UserDTO } from '../dto';
+import { UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 import { UserRepository } from '../repository';
 import { UserService } from './user.service';
+import bcrypt from 'bcrypt';
+import { Constants, generatePreSignedUrl } from '@utils';
 
 // import { Visibility } from '@prisma/client';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly repository: UserRepository) {}
 
-  async getUser(userId: any): Promise<UserDTO> {
+  async getUser(userId: string): Promise<UserViewDTO> {
     const user = await this.repository.getById(userId);
     if (!user) throw new NotFoundException('user');
     return user;
   }
 
-  async getUserRecommendations(userId: any, options: OffsetPagination): Promise<UserDTO[]> {
-    // TODO: make this return only users followed by users the original user follows
-    return await this.repository.getRecommendedUsersPaginated(options);
+  async getUserRecommendations(userId: string, options: OffsetPagination): Promise<UserViewDTO[]> {
+    // DONE: make this return only users followed by users the original user follows
+    return await this.repository.getRecommendedUsersPaginated(userId, options);
   }
 
-  async deleteUser(userId: any): Promise<void> {
+  async deleteUser(userId: string): Promise<void> {
     await this.repository.delete(userId);
   }
 
-  async updateUser(userId: string, user: UpdateInputDTO): Promise<void> {
-    await this.repository.updateUser(userId, user);
+  async updateUser(userId: string, user: UserUpdateInputDTO): Promise<UserUpdateOutputDTO | null> {
+    if (user.password) {
+      user.password = await bcrypt.hash(user.password, Constants.SALT_OR_ROUNDS);
+    }
+    if (user.profilePicture) {
+      const preSignedUrl = await generatePreSignedUrl(user.profilePicture);
+      user.profilePicture = preSignedUrl.key;
+      console.log(preSignedUrl);
+    }
+    return await this.repository.updateUser(userId, user);
   }
 }

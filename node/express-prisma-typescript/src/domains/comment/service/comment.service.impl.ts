@@ -6,6 +6,7 @@ import { validate } from 'class-validator';
 import { CreatePostInputDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
 import { ForbiddenException, InvalidUserException, NotFoundException } from '@utils';
+import { OffsetPagination } from '@types';
 
 export class CommentServiceImpl implements CommentService {
   constructor(private readonly repository: CommentRepository) {}
@@ -46,7 +47,7 @@ export class CommentServiceImpl implements CommentService {
     return comments;
   }
 
-  async getAllCommentsFromPost(userId: string, postId: string): Promise<CommentDTO[]> {
+  async getAllCommentsFromPostPaginated(userId: string, postId: string, options: OffsetPagination): Promise<CommentDTO[]> {
     const post = await this.repository.getById(postId);
     if (!post) throw new NotFoundException('post');
 
@@ -54,7 +55,7 @@ export class CommentServiceImpl implements CommentService {
     console.log(result);
     if (!result) throw new InvalidUserException();
 
-    const comments = await this.repository.getAllCommentsFromPost(postId);
+    const comments = await this.repository.getAllCommentsFromPost(postId, options);
     console.log(comments);
     if (!comments.length) throw new NotFoundException('no comments found');
     return comments;

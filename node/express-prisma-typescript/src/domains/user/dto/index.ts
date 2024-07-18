@@ -1,7 +1,6 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Visibility } from '@prisma/client';
 import { Transform } from 'class-transformer';
-
 
 export class UserDTO {
   constructor(user: UserDTO) {
@@ -10,11 +9,14 @@ export class UserDTO {
     this.visibility = user.visibility;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
+    this.profilePicture = user.profilePicture;
   }
 
   id: string;
   name: string | null;
   visibility: Visibility | null;
+  profilePicture: string | null;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,11 +28,12 @@ export class VisibilityInputDTO {
   visibility: Visibility = 'PUBLIC';
 }
 
-export class UpdateInputDTO {
-  constructor(name?: string, password?: string, visibility?: Visibility) {
+export class UserUpdateInputDTO {
+  constructor(name?: string, password?: string, visibility?: Visibility, profilePicture?: string) {
     this.name = name;
     this.password = password;
     this.visibility = visibility;
+    this.profilePicture = profilePicture;
   }
 
   @IsOptional()
@@ -43,7 +46,36 @@ export class UpdateInputDTO {
   readonly name?: string;
 
   @IsOptional()
-  readonly password?: string;
+  password?: string;
+
+  @IsOptional()
+  @IsString()
+  profilePicture?: string;
+}
+
+export class UserUpdateOutputDTO {
+  constructor(user: UserUpdateOutputDTO) {
+    this.id = user.id;
+    this.name = user.name;
+    this.profilePicture = user.profilePicture;
+    this.visibility = user.visibility;
+  }
+
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @IsEnum(Visibility)
+  @IsOptional()
+  visibility?: Visibility;
+
+  @IsOptional()
+  @IsString()
+  profilePicture?: string;
+
+  @IsOptional()
+  @IsString()
+  name?: string;
 }
 
 export class ExtendedUserDTO extends UserDTO {
@@ -68,7 +100,7 @@ export class UserViewDTO {
   }
 
   id: string;
-  name: string;
+  name: string | null;
   username: string;
   profilePicture: string | null;
 }
