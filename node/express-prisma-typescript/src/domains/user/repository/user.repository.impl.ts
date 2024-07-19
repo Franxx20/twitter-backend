@@ -3,6 +3,7 @@ import { PrismaClient, Visibility } from '@prisma/client';
 import { OffsetPagination } from '@types';
 import { ExtendedUserDTO, UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 import { UserRepository } from './user.repository';
+import * as console from 'node:console';
 
 // import { Visibility } from '@prisma/client';
 
@@ -148,5 +149,20 @@ export class UserRepositoryImpl implements UserRepository {
     });
 
     return follow !== null;
+  }
+
+  async getUsersContainsUsername(username: string): Promise<UserViewDTO[] | null> {
+    // return Promise.resolve(undefined);
+    const users = await this.db.user.findMany({
+      where: {
+        username: {
+          contains: username,
+        },
+      },
+    });
+
+    if (!users.length) return null;
+
+    return users;
   }
 }

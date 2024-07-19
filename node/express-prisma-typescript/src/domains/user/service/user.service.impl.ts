@@ -6,7 +6,6 @@ import { UserService } from './user.service';
 import bcrypt from 'bcrypt';
 import { Constants, generatePreSignedUrl } from '@utils';
 
-
 export class UserServiceImpl implements UserService {
   constructor(private readonly repository: UserRepository) {}
 
@@ -34,5 +33,12 @@ export class UserServiceImpl implements UserService {
       user.profilePicture = preSignedUrl.key;
     }
     return await this.repository.updateUser(userId, user);
+  }
+
+  async getUsersContainsUsername(username: string): Promise<UserViewDTO[]> {
+    // return Promise.resolve([]);
+    const users = await this.repository.getUsersContainsUsername(username);
+    if (users === null) throw new NotFoundException('users');
+    return users;
   }
 }

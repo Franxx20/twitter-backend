@@ -40,6 +40,17 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(user);
 });
 
+// Create endpoint GET api/user/by_username/:username to return a list of UserViewDTO
+// of those users whose usernames are included in :username. Add pagination.
+
+userRouter.get('/by_username/:username', async (req: Request, res: Response) => {
+  const { username } = req.params;
+
+  const users = await service.getUsersContainsUsername(username);
+
+  return res.status(HttpStatus.OK).json(users);
+});
+
 userRouter.delete('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
 

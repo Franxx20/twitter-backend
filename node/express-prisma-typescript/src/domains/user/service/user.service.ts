@@ -9,4 +9,5 @@ export interface UserService {
   getUser: (userId: string) => Promise<UserViewDTO>;
   getUserRecommendations: (userId: string, options: OffsetPagination) => Promise<UserViewDTO[]>;
   updateUser: (userId: string, user: UserUpdateInputDTO) => Promise<UserUpdateOutputDTO | null>;
+  getUsersContainsUsername: (username: string) => Promise<UserViewDTO[]>;
 }

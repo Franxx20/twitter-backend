@@ -10,5 +10,7 @@ export interface UserRepository {
   getByEmailOrUsername: (email?: string, username?: string) => Promise<ExtendedUserDTO | null>;
   // updateVisibility: (user: UserUpdateDTO) => Promise<void>;
   updateUser: (userId: string, user: UserUpdateInputDTO) => Promise<UserUpdateOutputDTO | null>;
+
+  getUsersContainsUsername: (username: string) => Promise<UserViewDTO[] | null>;
   isUserPublicOrFollowed: (userId: string, otherUserId: string) => Promise<boolean>;
 }
