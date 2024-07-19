@@ -40,16 +40,22 @@ export class PostServiceImpl implements PostService {
     return post;
   }
 
-  async getLatestPosts(userId: string, options: CursorPagination): Promise<PostDTO[]> {
-    return await this.repository.getAllByDatePaginated(userId, options);
+  async getLatestPosts(userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
+    const posts = await this.repository.getAllByDatePaginated(userId, options);
+    if (!posts.length) throw new NotFoundException('posts');
+
+    return posts;
   }
 
-  async getPostsByAuthor(userId: any, authorId: string): Promise<PostDTO[]> {
+  async getPostsByAuthor(userId: any, authorId: string): Promise<ExtendedPostDTO[]> {
     const result = await this.repository.isPostAuthorPublicOrFollowed(userId, authorId);
     if (!result) {
       throw new InvalidUserException();
     }
-    return await this.repository.getByAuthorId(authorId);
-  }
+    const authors = await this.repository.getByAuthorId(authorId);
 
+    if (!authors.length) throw new NotFoundException('authors');
+
+    return authors;
+  }
 }

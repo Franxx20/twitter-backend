@@ -6,8 +6,8 @@ export interface PostRepository {
   delete: (postId: string) => Promise<void>;
 
   getById: (postId: string) => Promise<PostDTO | null>;
-  getByAuthorId: (authorId: string) => Promise<PostDTO[]>;
-  getAllByDatePaginated: (usedId: string, options: CursorPagination) => Promise<PostDTO[]>;
+  getByAuthorId: (authorId: string) => Promise<ExtendedPostDTO[]>;
+  getAllByDatePaginated: (usedId: string, options: CursorPagination) => Promise<ExtendedPostDTO[]>;
 
   isPostAuthorPublicOrFollowed: (userId: string, authorId: string) => Promise<boolean>;
 

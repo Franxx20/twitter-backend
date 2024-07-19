@@ -22,7 +22,7 @@ export class PostRepositoryImpl implements PostRepository {
   // All users are currently public, meaning that i can see tweets from anyone, without having to follow them.
   // Add the ability for users to have private profiles and store it in the User table.
   // Update the GET api/post to return only posts with public account authors or private account authors that the user follows.
-  async getAllByDatePaginated(userId: string, options: CursorPagination): Promise<PostDTO[]> {
+  async getAllByDatePaginated(userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
     const userFollows = await this.db.follow.findMany({
       where: {
         followerId: userId,
@@ -53,6 +53,10 @@ export class PostRepositoryImpl implements PostRepository {
         ],
       },
 
+      include: {
+        author: true,
+      },
+
       cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
       take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
@@ -66,7 +70,7 @@ export class PostRepositoryImpl implements PostRepository {
       ],
     });
 
-    return posts.map((post) => new PostDTO(post));
+    return posts.map((post) => new ExtendedPostDTO(post));
   }
 
   async delete(postId: string): Promise<void> {
@@ -86,13 +90,16 @@ export class PostRepositoryImpl implements PostRepository {
     return post != null ? new PostDTO(post) : null;
   }
 
-  async getByAuthorId(authorId: string): Promise<PostDTO[]> {
+  async getByAuthorId(authorId: string): Promise<ExtendedPostDTO[]> {
     const posts = await this.db.post.findMany({
       where: {
         authorId,
       },
+      include: {
+        author: true,
+      },
     });
-    return posts.map((post) => new PostDTO(post));
+    return posts.map((post) => new ExtendedPostDTO(post));
   }
 
   async isPostAuthorPublicOrFollowed(userId: string, authorId: string): Promise<boolean> {
@@ -117,5 +124,4 @@ export class PostRepositoryImpl implements PostRepository {
 
     return follow !== null;
   }
-
 }
