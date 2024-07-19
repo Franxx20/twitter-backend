@@ -31,7 +31,7 @@ export class PostDTO {
   createdAt: Date;
 }
 
-export interface PresignedUrl {
+export interface PreSignedUrl {
   signedUrl: string;
   key: string;
 }

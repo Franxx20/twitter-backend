@@ -1,4 +1,4 @@
-import { CreatePostInputDTO } from '@domains/post/dto';
+import { CreatePostInputDTO, ExtendedPostDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
 import { OffsetPagination } from '@types';
 
@@ -11,4 +11,6 @@ export interface CommentRepository {
   getAllCommentsFromUser: (userId: string) => Promise<CommentDTO[]>;
 
   isPostAuthorPublicOrFollowed: (userId: string, postId: string) => Promise<boolean>;
+
+  getParentPost: (postId: string) => Promise<ExtendedPostDTO | null>;
 }

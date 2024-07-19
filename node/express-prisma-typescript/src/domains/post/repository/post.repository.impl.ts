@@ -3,7 +3,7 @@ import { PrismaClient, Visibility } from '@prisma/client';
 import { CursorPagination } from '@types';
 
 import { PostRepository } from '.';
-import { CreatePostInputDTO, PostDTO } from '../dto';
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto';
 
 export class PostRepositoryImpl implements PostRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -117,4 +117,5 @@ export class PostRepositoryImpl implements PostRepository {
 
     return follow !== null;
   }
+
 }

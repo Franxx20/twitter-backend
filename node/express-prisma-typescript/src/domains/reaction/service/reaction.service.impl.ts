@@ -3,6 +3,7 @@ import { ReactionRepository } from '@domains/reaction/repository';
 import { ReactionService } from '@domains/reaction/service/reaction.service';
 import { ForbiddenException, NotFoundException } from '@utils';
 import { validate } from 'class-validator';
+import { ExtendedPostDTO } from '@domains/post/dto';
 
 export class ReactionServiceImpl implements ReactionService {
   constructor(private readonly repository: ReactionRepository) {}
@@ -73,4 +74,5 @@ export class ReactionServiceImpl implements ReactionService {
 
     return reactions;
   }
+
 }

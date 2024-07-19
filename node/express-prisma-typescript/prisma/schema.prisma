@@ -81,6 +81,10 @@ model Post {
 
   comments Post[] @relation("PostToPost")
 
+  qtyComments Int @default(0)
+  qtyLikes    Int @default(0)
+  qtyRetweets Int @default(0)
+
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
   reactions Reaction[] // Changed to plural to denote relation
 }

@@ -1,4 +1,4 @@
-import { CreatePostInputDTO, PostDTO, PresignedUrl } from '../dto';
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO, PreSignedUrl } from '../dto';
 
 import { PostRepository } from '../repository';
 import { PostService } from '.';
@@ -13,7 +13,7 @@ export class PostServiceImpl implements PostService {
     await validate(data);
 
     if (data.images !== undefined) {
-      const urls: PresignedUrl[] = await generatePreSignedUrls(data.images);
+      const urls: PreSignedUrl[] = await generatePreSignedUrls(data.images);
       console.log(urls);
       data.images = urls.map((url) => url.key);
     }
@@ -51,4 +51,5 @@ export class PostServiceImpl implements PostService {
     }
     return await this.repository.getByAuthorId(authorId);
   }
+
 }

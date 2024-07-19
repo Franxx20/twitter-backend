@@ -28,10 +28,19 @@ commentRouter.get('/:postId', async (req: Request, res: Response) => {
   const { limit, skip } = req.query as Record<string, string>;
 
   console.log('buscando todos los comentarios de un post');
-  const comments = await service.getAllCommentsFromPostPaginated(userId, postId, { limit: Number(limit), skip: Number(skip) });
-  console.log(comments);
+  const comments = await service.getAllCommentsFromPostPaginated(userId, postId, {
+    limit: Number(limit),
+    skip: Number(skip),
+  });
+  // console.log(comments);
 
-  return res.status(HttpStatus.OK).json(comments);
+  const parentPost = await service.getParentPost(postId);
+  // console.log(parentPost);
+
+  return res.status(HttpStatus.OK).json({
+    parentPost,
+    comments,
+  });
 });
 
 commentRouter.get('/user/:userId', async (req: Request, res: Response) => {

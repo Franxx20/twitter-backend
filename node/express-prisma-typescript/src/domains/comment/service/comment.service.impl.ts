@@ -3,7 +3,7 @@ import { CommentRepository } from '@domains/comment/repository/comment.repositor
 import { CommentService } from '@domains/comment/service/comment.service';
 
 import { validate } from 'class-validator';
-import { CreatePostInputDTO } from '@domains/post/dto';
+import { CreatePostInputDTO, ExtendedPostDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
 import { ForbiddenException, InvalidUserException, NotFoundException } from '@utils';
 import { OffsetPagination } from '@types';
@@ -47,7 +47,11 @@ export class CommentServiceImpl implements CommentService {
     return comments;
   }
 
-  async getAllCommentsFromPostPaginated(userId: string, postId: string, options: OffsetPagination): Promise<CommentDTO[]> {
+  async getAllCommentsFromPostPaginated(
+    userId: string,
+    postId: string,
+    options: OffsetPagination
+  ): Promise<CommentDTO[]> {
     const post = await this.repository.getById(postId);
     if (!post) throw new NotFoundException('post');
 
@@ -60,4 +64,12 @@ export class CommentServiceImpl implements CommentService {
     if (!comments.length) throw new NotFoundException('no comments found');
     return comments;
   }
+
+  async getParentPost(parentPostId: string): Promise<ExtendedPostDTO | null> {
+    const parentPostWithAuthor = await this.repository.getParentPost(parentPostId);
+    if (parentPostWithAuthor === null) return null;
+
+    return parentPostWithAuthor;
+  }
+
 }

@@ -3,6 +3,7 @@ import { PrismaClient, ReactionAction, Visibility } from '@prisma/client';
 import { ReactionRepository } from '.';
 import { ReactionDTO, CreateReactionDTO } from '../dto';
 import { ForbiddenException } from '@utils';
+import { ExtendedPostDTO } from '@domains/post/dto';
 
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -25,16 +26,64 @@ export class ReactionRepositoryImpl implements ReactionRepository {
         ...data,
       },
     });
+
+    if (data.action === ReactionAction.LIKE) {
+      await this.db.post.update({
+        where: {
+          id: data.postId,
+        },
+        data: {
+          qtyLikes: {
+            increment: 1,
+          },
+        },
+      });
+    } else if (data.action === ReactionAction.RETWEET) {
+      await this.db.post.update({
+        where: {
+          id: data.postId,
+        },
+        data: {
+          qtyRetweets: {
+            increment: 1,
+          },
+        },
+      });
+    }
+
     // console.log(reaction, new ReactionDTO(reaction));
     return new ReactionDTO(reaction);
   }
 
   async delete(reactionId: string): Promise<void> {
-    await this.db.reaction.delete({
+    const deletedReaction = await this.db.reaction.delete({
       where: {
         id: reactionId,
       },
     });
+    if (deletedReaction.action === ReactionAction.LIKE) {
+      await this.db.post.update({
+        where: {
+          id: deletedReaction.postId,
+        },
+        data: {
+          qtyLikes: {
+            increment: 1,
+          },
+        },
+      });
+    } else if (deletedReaction.action === ReactionAction.RETWEET) {
+      await this.db.post.update({
+        where: {
+          id: deletedReaction.postId,
+        },
+        data: {
+          qtyRetweets: {
+            increment: 1,
+          },
+        },
+      });
+    }
   }
 
   // make better checks later

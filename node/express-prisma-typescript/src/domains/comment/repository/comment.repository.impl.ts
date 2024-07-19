@@ -1,7 +1,7 @@
 import { PrismaClient, Visibility } from '@prisma/client';
 
 import { CommentRepository } from '@domains/comment/repository/comment.repository';
-import { CreatePostInputDTO } from '@domains/post/dto';
+import { CreatePostInputDTO, ExtendedPostDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
 import { OffsetPagination } from '@types';
 
@@ -16,7 +16,17 @@ export class CommentRepositoryImpl implements CommentRepository {
         ...data,
       },
     });
-
+    // Increment the qtyComments field in the parent post
+    await this.db.post.update({
+      where: {
+        id: parentPostId,
+      },
+      data: {
+        qtyComments: {
+          increment: 1,
+        },
+      },
+    });
     return new CommentDTO(commentPost);
   }
 
@@ -26,18 +36,31 @@ export class CommentRepositoryImpl implements CommentRepository {
         id: postId,
       },
     });
+    // Increment the qtyComments field in the parent post
+    await this.db.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        qtyComments: {
+          decrement: 1,
+        },
+      },
+    });
   }
 
   async getAllCommentsFromPost(postId: string, options: OffsetPagination): Promise<CommentDTO[]> {
     const comments = await this.db.post.findMany({
       take: options.limit ? options.limit : undefined,
       skip: options.skip ? options.skip : undefined,
-      // orderBy:[
-      //   {
-      //     reaction
-      //   }
-      //
-      // ],
+      // ask
+      include: {
+        reactions: {
+          orderBy: {
+            action: 'asc',
+          },
+        },
+      },
       where: {
         id: postId,
       },
@@ -92,5 +115,18 @@ export class CommentRepositoryImpl implements CommentRepository {
     });
 
     return follow !== null;
+  }
+
+  async getParentPost(postId: string): Promise<ExtendedPostDTO | null> {
+    const postWithAuthor = await this.db.post.findUnique({
+      where: {
+        id: postId,
+      },
+      include: {
+        author: true,
+      },
+    });
+    if (postWithAuthor === null) return null;
+    return new ExtendedPostDTO(postWithAuthor);
   }
 }

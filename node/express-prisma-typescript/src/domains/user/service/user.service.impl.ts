@@ -6,7 +6,6 @@ import { UserService } from './user.service';
 import bcrypt from 'bcrypt';
 import { Constants, generatePreSignedUrl } from '@utils';
 
-// import { Visibility } from '@prisma/client';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly repository: UserRepository) {}
@@ -33,7 +32,6 @@ export class UserServiceImpl implements UserService {
     if (user.profilePicture) {
       const preSignedUrl = await generatePreSignedUrl(user.profilePicture);
       user.profilePicture = preSignedUrl.key;
-      console.log(preSignedUrl);
     }
     return await this.repository.updateUser(userId, user);
   }
