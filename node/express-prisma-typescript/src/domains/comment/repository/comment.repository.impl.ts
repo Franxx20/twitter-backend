@@ -3,7 +3,7 @@ import { PrismaClient, Visibility } from '@prisma/client';
 import { CommentRepository } from '@domains/comment/repository/comment.repository';
 import { CreatePostInputDTO, ExtendedPostDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
-import { OffsetPagination } from '@types';
+import { CursorPagination} from '@types';
 
 export class CommentRepositoryImpl implements CommentRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -49,11 +49,11 @@ export class CommentRepositoryImpl implements CommentRepository {
     });
   }
 
-  async getAllCommentsFromPost(postId: string, options: OffsetPagination): Promise<CommentDTO[]> {
+  async getAllCommentsFromPost(postId: string, options: CursorPagination): Promise<CommentDTO[]> {
     const comments = await this.db.post.findMany({
-      take: options.limit ? options.limit : undefined,
-      skip: options.skip ? options.skip : undefined,
-      // ask
+      cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
       include: {
         reactions: {
           orderBy: {
