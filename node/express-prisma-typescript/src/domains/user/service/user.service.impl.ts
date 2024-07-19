@@ -41,4 +41,8 @@ export class UserServiceImpl implements UserService {
     if (users === null) throw new NotFoundException('users');
     return users;
   }
+
+  async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {
+    return await this.repository.isUserFollowed(userId, otherUserId);
+  }
 }

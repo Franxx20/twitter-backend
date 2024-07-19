@@ -34,10 +34,15 @@ userRouter.get('/me', async (req: Request, res: Response) => {
 
 userRouter.get('/:userId', async (req: Request, res: Response) => {
   const { userId: otherUserId } = req.params;
+  const { userId } = res.locals.context;
 
+  const result = await service.isUserFollowed(userId, otherUserId);
   const user = await service.getUser(otherUserId);
 
-  return res.status(HttpStatus.OK).json(user);
+  return res.status(HttpStatus.OK).json({
+    isFollowing: result,
+    user,
+  });
 });
 
 // Create endpoint GET api/user/by_username/:username to return a list of UserViewDTO

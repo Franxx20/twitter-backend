@@ -1,9 +1,9 @@
 import { SignupInputDTO } from '@domains/auth/dto';
+
 import { PrismaClient, Visibility } from '@prisma/client';
 import { OffsetPagination } from '@types';
 import { ExtendedUserDTO, UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 import { UserRepository } from './user.repository';
-import * as console from 'node:console';
 
 // import { Visibility } from '@prisma/client';
 
@@ -18,14 +18,6 @@ export class UserRepositoryImpl implements UserRepository {
     return new UserDTO(user);
   }
 
-  // async getById(userId: string): Promise<UserViewDTO | null> {
-  //   const user: User | null = await this.db.user.findUnique({
-  //     where: {
-  //       id: userId,
-  //     },
-  //   });
-  //   return user ? new UserViewDTO(user) : null;
-  // }
   async getById(userId: string): Promise<UserViewDTO | null> {
     if (!userId) {
       return null;
@@ -125,7 +117,6 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async isUserPublicOrFollowed(userId: string, otherUserId: string): Promise<boolean> {
-    // return Promise.resolve(false);
     const otherUser = await this.db.user.findUnique({
       where: {
         id: otherUserId,
@@ -164,5 +155,27 @@ export class UserRepositoryImpl implements UserRepository {
     if (!users.length) return null;
 
     return users;
+  }
+
+  async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {
+    const otherUser = await this.db.user.findUnique({
+      where: {
+        id: otherUserId,
+      },
+    });
+
+    if (otherUser === null) {
+      console.log(`otherUserId ${otherUserId} not found`);
+      return false;
+    }
+
+    const follow = await this.db.follow.findFirst({
+      where: {
+        followerId: userId,
+        followedId: otherUserId,
+      },
+    });
+
+    return follow !== null;
   }
 }

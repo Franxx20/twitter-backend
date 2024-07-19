@@ -1,5 +1,5 @@
 import { OffsetPagination } from '@types';
-import { UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
+import { UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 // import { Visibility } from '@prisma/client';
 // import {userUP
 // import {UserUpdateDTO} from '../dto';
@@ -10,4 +10,5 @@ export interface UserService {
   getUserRecommendations: (userId: string, options: OffsetPagination) => Promise<UserViewDTO[]>;
   updateUser: (userId: string, user: UserUpdateInputDTO) => Promise<UserUpdateOutputDTO | null>;
   getUsersContainsUsername: (username: string) => Promise<UserViewDTO[]>;
+  isUserFollowed: (userId: string, otherUserId: string) => Promise<boolean>;
 }
