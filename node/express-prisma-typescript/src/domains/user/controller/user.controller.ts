@@ -4,7 +4,7 @@ import HttpStatus from 'http-status';
 
 import 'express-async-errors';
 
-import { BodyValidation, db } from '@utils';
+import { BodyValidation, db, generatePreSignedUrl } from '@utils';
 
 import { UserRepositoryImpl } from '../repository';
 import { UserService, UserServiceImpl } from '../service';
@@ -29,7 +29,16 @@ userRouter.get('/me', async (req: Request, res: Response) => {
 
   const user = await service.getUser(userId);
 
-  return res.status(HttpStatus.OK).json(user);
+  let url: string = '';
+  if (user.profilePicture) {
+    const preSignedUrl = await generatePreSignedUrl(user.profilePicture);
+    url = preSignedUrl.signedUrl;
+  }
+
+  return res.status(HttpStatus.OK).json({
+    user,
+    url,
+  });
 });
 
 userRouter.get('/:userId', async (req: Request, res: Response) => {
@@ -71,7 +80,16 @@ userRouter.put('/update', BodyValidation(UserUpdateInputDTO), async (req: Reques
 
   console.log(`${userId as string} ${name as string}, ${password as string}, ${visibility as string}`);
 
-  await service.updateUser(userId, new UserUpdateInputDTO(name, password, visibility, profilePicture));
+  let url: string = '';
+  const user = await service.updateUser(userId, new UserUpdateInputDTO(name, password, visibility, profilePicture));
+  if (user?.profilePicture) {
+    const preSignedUrl = await generatePreSignedUrl(user.profilePicture);
+    url = preSignedUrl.signedUrl;
+  }
 
-  res.status(HttpStatus.OK).send({ message: 'User updated successfully' });
+  res.status(HttpStatus.OK).send({
+    message: 'User updated successfully',
+    user,
+    url,
+  });
 });
