@@ -5,3 +5,6 @@ export * from './database';
 export * from './validation';
 export * from './errors';
 export * from './myaws';
+
+// this line breaks the server
+// export * from './mySocketIo';

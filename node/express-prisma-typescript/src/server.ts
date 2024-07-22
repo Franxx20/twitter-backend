@@ -3,10 +3,12 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
-import { Constants, NodeEnv, Logger } from '@utils';
+import { Constants, NodeEnv, Logger, UnauthorizedException } from '@utils';
 import { router } from '@router';
 import { ErrorHandling } from '@utils/errors';
 import { Server } from 'socket.io';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
 
 export const app = express();
 
@@ -50,7 +52,7 @@ app.use(ErrorHandling);
 export const httpServer = app.listen(Constants.PORT, () => {
   Logger.info(`
       ################################################
-      🛡️  Server listening on port: ${Constants.PORT} 🛡️ 
+      🛡️  Server listening on port: ${Constants.PORT} ${Date()} 🛡️ 
       ################################################
     `);
 });
@@ -60,4 +62,48 @@ export const io = new Server(httpServer, {
     origin: Constants.CORS_WHITELIST,
     methods: ['GET', 'POST'],
   },
+});
+
+io.use((socket, next) => {
+  const token = socket.handshake.headers.authorization;
+  if (!token) {
+    next(new UnauthorizedException('MISSING_TOKEN'));
+  } else {
+    jwt.verify(token, Constants.TOKEN_SECRET, (err, context) => {
+      if (err) next(new UnauthorizedException('INVALID_TOKEN'));
+      const decodedToken = context as JwtPayload;
+      socket.data.userId = decodedToken.userId;
+      next();
+    });
+  }
+});
+
+io.on('connection', async (socket) => {
+  console.log(`socket ${socket.id} connected`);
+  socket.broadcast.emit('user connected', {
+    userId: socket.data.userId,
+    sessionId: socket.id,
+  });
+  await socket.join(socket.data.userId);
+
+  socket.on('message', async ({ receiverId, message }) => {
+    // const roomId = [socket.data.senderId as string, receiverId as string].sort().join('-');
+    // console.log(roomId);
+    // await socket.join(roomId);
+    // //
+    // io.to(roomId).emit('message', { message });
+    io.to(socket.data.userId).to(receiverId).emit('message', {
+      message,
+      from: receiverId,
+      receiverId
+    });
+  });
+
+  // upon disconnection
+  socket.on('disconnect', (reason) => {
+    console.log(`socket ${socket.id} disconnected due to ${reason}`);
+    socket.broadcast.emit('user disconnected', {
+      userId: socket.data.userId,
+    });
+  });
 });
