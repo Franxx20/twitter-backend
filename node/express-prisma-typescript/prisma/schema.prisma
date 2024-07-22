@@ -60,17 +60,23 @@ model User {
   deletedAt DateTime? // Optional value
 
   posts     Post[]
-  follows   Follow[]   @relation(name: "follows")
-  followers Follow[]   @relation(name: "followers")
-  Reaction  Reaction[]
-  Message   Message[]
+  follows   Follow[] @relation(name: "follows")
+  followers Follow[] @relation(name: "followers")
+
+  Reaction Reaction[]
+
+  sendedMessages   Message[] @relation(name: "sender")
+  receivedMessages Message[] @relation(name: "receiver")
 }
 
 model Message {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary key
 
-  authorId String @db.Uuid // Foreing Key
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  senderId String @db.Uuid // Foreing Key
+  sender   User   @relation(name: "sender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String @db.Uuid // Foreing Key
+  receiver   User   @relation(name: "receiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   createdAt DateTime  @default(now())
   deletedAt DateTime? // Optional value

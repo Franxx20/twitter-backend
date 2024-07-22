@@ -87,11 +87,6 @@ io.on('connection', async (socket) => {
   await socket.join(socket.data.userId);
 
   socket.on('message', async ({ receiverId, message }) => {
-    // const roomId = [socket.data.senderId as string, receiverId as string].sort().join('-');
-    // console.log(roomId);
-    // await socket.join(roomId);
-    // //
-    // io.to(roomId).emit('message', { message });
     io.to(socket.data.userId).to(receiverId).emit('message', {
       message,
       from: receiverId,
