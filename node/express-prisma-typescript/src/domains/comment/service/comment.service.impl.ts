@@ -38,7 +38,6 @@ export class CommentServiceImpl implements CommentService {
 
   async getAllCommentsFromUser(userId: string, authorId: string): Promise<CommentDTO[]> {
     const result = await this.repository.isPostAuthorPublicOrFollowed(userId, authorId);
-    console.log(result);
     if (!result) throw new InvalidUserException();
 
     const comments = await this.repository.getAllCommentsFromUser(authorId);
@@ -56,11 +55,9 @@ export class CommentServiceImpl implements CommentService {
     if (!post) throw new NotFoundException('post');
 
     const result = await this.repository.isPostAuthorPublicOrFollowed(userId, post.authorId);
-    console.log(result);
     if (!result) throw new InvalidUserException();
 
     const comments = await this.repository.getAllCommentsFromPost(postId, options);
-    console.log(comments);
     if (!comments.length) throw new NotFoundException('no comments found');
     return comments;
   }

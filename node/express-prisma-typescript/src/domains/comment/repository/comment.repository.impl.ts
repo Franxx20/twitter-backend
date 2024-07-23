@@ -3,7 +3,7 @@ import { PrismaClient, Visibility } from '@prisma/client';
 import { CommentRepository } from '@domains/comment/repository/comment.repository';
 import { CreatePostInputDTO, ExtendedPostDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
-import { CursorPagination} from '@types';
+import { CursorPagination } from '@types';
 
 export class CommentRepositoryImpl implements CommentRepository {
   constructor(private readonly db: PrismaClient) {}

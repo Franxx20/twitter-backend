@@ -3,12 +3,15 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
-import { Constants, NodeEnv, Logger, UnauthorizedException } from '@utils';
+import { Constants, NodeEnv, Logger, UnauthorizedException, NotFoundException, ForbiddenException } from '@utils';
 import { router } from '@router';
 import { ErrorHandling } from '@utils/errors';
-import { Server } from 'socket.io';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { randomUUID } from 'crypto';
+import { DisconnectReason, Server, Socket } from 'socket.io';
+import jwt, { JwtPayload, VerifyCallback, VerifyErrors } from 'jsonwebtoken';
+import { MessageServiceImpl } from '@domains/message/service';
+import { MessageRepositoryImpl } from '@domains/message/repository';
+import { messageService } from '@domains/message/controller';
+import { MessageDTO } from '@domains/message/dto';
 
 export const app = express();
 
@@ -66,11 +69,13 @@ export const io = new Server(httpServer, {
 
 io.use((socket, next) => {
   const token = socket.handshake.headers.authorization;
-  if (!token) {
+  if (token === undefined) {
     next(new UnauthorizedException('MISSING_TOKEN'));
   } else {
-    jwt.verify(token, Constants.TOKEN_SECRET, (err, context) => {
+    jwt.verify(token, Constants.TOKEN_SECRET, (err: VerifyErrors | null, context) => {
+      // TODO need to add context verification
       if (err) next(new UnauthorizedException('INVALID_TOKEN'));
+      if (context === undefined) next(new NotFoundException('MISSING MESSAGE DATA'));
       const decodedToken = context as JwtPayload;
       socket.data.userId = decodedToken.userId;
       next();
@@ -78,7 +83,8 @@ io.use((socket, next) => {
   }
 });
 
-io.on('connection', async (socket) => {
+io.on('connection', async (socket): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   console.log(`socket ${socket.id} connected`);
   socket.broadcast.emit('user connected', {
     userId: socket.data.userId,
@@ -86,19 +92,29 @@ io.on('connection', async (socket) => {
   });
   await socket.join(socket.data.userId);
 
-  socket.on('message', async ({ receiverId, message }) => {
-    io.to(socket.data.userId).to(receiverId).emit('message', {
-      message,
-      from: receiverId,
-      receiverId
-    });
+  socket.on('message', async ({ receiverId, content }, next): Promise<void> => {
+    const senderId = socket.data.userId;
+
+    if (await messageService.isReceiverFollowed(senderId, receiverId)) {
+      await messageService.create({ senderId, receiverId, content });
+
+      io.to(senderId).to(receiverId).emit('message', {
+        message: content,
+        from: receiverId,
+        receiverId,
+      });
+    } else {
+      next(new ForbiddenException());
+    }
   });
 
   // upon disconnection
   socket.on('disconnect', (reason) => {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     console.log(`socket ${socket.id} disconnected due to ${reason}`);
+    const senderId = socket.data.userId;
     socket.broadcast.emit('user disconnected', {
-      userId: socket.data.userId,
+      userId: senderId,
     });
   });
 });
