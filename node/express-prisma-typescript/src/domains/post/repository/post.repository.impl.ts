@@ -19,7 +19,7 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post);
   }
 
-  // All users are currently public, meaning that i can see tweets from anyone, without having to follow them.
+  // All users are currently public, meaning that I can see tweets from anyone, without having to follow them.
   // Add the ability for users to have private profiles and store it in the User table.
   // Update the GET api/post to return only posts with public account authors or private account authors that the user follows.
   async getAllByDatePaginated(userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
@@ -33,12 +33,10 @@ export class PostRepositoryImpl implements PostRepository {
     });
 
     const followedIds = userFollows.map((follow) => follow.followedId);
-    // console.log(followedIds);
 
     const posts = await this.db.post.findMany({
       where: {
         OR: [
-          // { authorId: userId },
           {
             author: {
               visibility: Visibility.PUBLIC,
