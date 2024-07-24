@@ -1,6 +1,6 @@
 import { SignupInputDTO } from '@domains/auth/dto';
 import { OffsetPagination } from '@types';
-import { ExtendedUserDTO, UserUpdateInputDTO, UserDTO, UserViewDTO, UserUpdateOutputDTO } from '../dto';
+import { ExtendedUserDTO, UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 
 export interface UserRepository {
   create: (data: SignupInputDTO) => Promise<UserDTO>;
@@ -12,6 +12,6 @@ export interface UserRepository {
   updateUser: (userId: string, user: UserUpdateInputDTO) => Promise<UserUpdateOutputDTO | null>;
 
   getUsersContainsUsername: (username: string) => Promise<UserViewDTO[] | null>;
-  isUserPublicOrFollowed: (userId: string, otherUserId: string) => Promise<boolean>;
-  isUserFollowed: (userId: string, otherUserId: string) => Promise<boolean>;
+  // isUserPublicOrFollowed: (userId: string, otherUserId: string) => Promise<boolean>;
+  // isUserFollowed: (userId: string, otherUserId: string) => Promise<boolean>;
 }

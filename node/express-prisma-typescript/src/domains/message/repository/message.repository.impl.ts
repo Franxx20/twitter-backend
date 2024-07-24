@@ -58,13 +58,13 @@ export class MessageRepositoryImpl implements MessageRepository {
     return new MessageDTO(message);
   }
 
-  async isReceiverFollowed(senderId: string, receiverId: string): Promise<boolean> {
-    const follow = await this.db.follow.findFirst({
-      where: {
-        followerId: senderId,
-        followedId: receiverId,
-      },
-    });
-    return follow !== null;
-  }
+  // async isReceiverFollowed(senderId: string, receiverId: string): Promise<boolean> {
+  //   const follow = await this.db.follow.findFirst({
+  //     where: {
+  //       followerId: senderId,
+  //       followedId: receiverId,
+  //     },
+  //   });
+  //   return follow !== null;
+  // }
 }

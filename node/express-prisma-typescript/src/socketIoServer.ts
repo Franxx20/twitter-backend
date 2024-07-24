@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { Constants, ForbiddenException, NotFoundException, UnauthorizedException } from '@utils';
+import { Constants, ForbiddenException, isUserFollowed, NotFoundException, UnauthorizedException } from '@utils';
 import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
 import { messageService } from '@domains/message/controller';
 import http, { IncomingMessage, ServerResponse } from 'node:http';
@@ -45,7 +45,7 @@ export const initSocketServer = (httpServer: http.Server<typeof IncomingMessage,
     socket.on('message', async ({ receiverId, content }): Promise<void> => {
       const senderId = socket.data.userId;
 
-      if (await messageService.isReceiverFollowed(senderId, receiverId)) {
+      if (await isUserFollowed(senderId, receiverId)) {
         io.to(senderId).to(receiverId).emit('message', {
           message: content,
           from: receiverId,

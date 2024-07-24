@@ -5,7 +5,7 @@ import { CommentService } from '@domains/comment/service/comment.service';
 import { validate } from 'class-validator';
 import { CreatePostInputDTO, ExtendedPostDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
-import { ForbiddenException, InvalidUserException, NotFoundException } from '@utils';
+import { ForbiddenException, InvalidUserException, isUserPublicOrFollowed, NotFoundException } from '@utils';
 import { OffsetPagination } from '@types';
 
 export class CommentServiceImpl implements CommentService {
@@ -29,7 +29,7 @@ export class CommentServiceImpl implements CommentService {
     const comment = await this.repository.getById(postId);
     if (!comment) throw new NotFoundException('comment');
 
-    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, comment.authorId);
+    const result = await isUserPublicOrFollowed(userId, comment.authorId);
     console.log(result);
     if (!result) throw new InvalidUserException();
 
@@ -37,7 +37,7 @@ export class CommentServiceImpl implements CommentService {
   }
 
   async getAllCommentsFromUser(userId: string, authorId: string): Promise<CommentDTO[]> {
-    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, authorId);
+    const result = await isUserPublicOrFollowed(userId, authorId);
     if (!result) throw new InvalidUserException();
 
     const comments = await this.repository.getAllCommentsFromUser(authorId);
@@ -54,7 +54,7 @@ export class CommentServiceImpl implements CommentService {
     const post = await this.repository.getById(postId);
     if (!post) throw new NotFoundException('post');
 
-    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, post.authorId);
+    const result = await isUserPublicOrFollowed(userId, post.authorId);
     if (!result) throw new InvalidUserException();
 
     const comments = await this.repository.getAllCommentsFromPost(postId, options);
@@ -68,5 +68,4 @@ export class CommentServiceImpl implements CommentService {
 
     return parentPostWithAuthor;
   }
-
 }

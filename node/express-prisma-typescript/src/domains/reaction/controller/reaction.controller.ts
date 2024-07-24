@@ -3,7 +3,7 @@ import HttpStatus from 'http-status';
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors';
 
-import { db, BodyValidation } from '@utils';
+import { BodyValidation, db } from '@utils';
 
 import { ReactionRepositoryImpl } from '../repository';
 import { ReactionService, ReactionServiceImpl } from '@domains/reaction/service';
@@ -33,7 +33,7 @@ reactionRouter.get('/likes', async (req: Request, res: Response) => {
 
 reactionRouter.get('/retweets', async (req: Request, res: Response) => {
   // const { userId: authorId } = req.params;
-  const {authorId} = req.query
+  const { authorId } = req.query;
   const { userId } = res.locals.context;
 
   const retweets = await service.getAllRetweetsFromUser(userId, authorId as string);

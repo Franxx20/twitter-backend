@@ -1,9 +1,8 @@
 import { CreateReactionDTO, ReactionDeleteDTO, ReactionDTO } from '@domains/reaction/dto';
 import { ReactionRepository } from '@domains/reaction/repository';
 import { ReactionService } from '@domains/reaction/service/reaction.service';
-import { ForbiddenException, NotFoundException } from '@utils';
+import { ForbiddenException, isUserPublicOrFollowed, NotFoundException } from '@utils';
 import { validate } from 'class-validator';
-import { ExtendedPostDTO } from '@domains/post/dto';
 
 export class ReactionServiceImpl implements ReactionService {
   constructor(private readonly repository: ReactionRepository) {}
@@ -36,7 +35,7 @@ export class ReactionServiceImpl implements ReactionService {
   }
 
   async getReactionsFromUser(userId: string, authorId: string): Promise<ReactionDTO[]> {
-    const result = await this.repository.isReactionAuthorPublicOrFollowed(userId, authorId);
+    const result = await isUserPublicOrFollowed(userId, authorId);
     if (!result) throw new ForbiddenException();
 
     const reactions = await this.repository.getAllReactionsFromUser(authorId);
@@ -56,7 +55,7 @@ export class ReactionServiceImpl implements ReactionService {
   }
 
   async getAllLikesFromUser(userId: string, authorId: string): Promise<ReactionDTO[]> {
-    const result = await this.repository.isReactionAuthorPublicOrFollowed(userId, authorId);
+    const result = await isUserPublicOrFollowed(userId, authorId);
     if (!result) throw new ForbiddenException();
 
     const reactions = await this.repository.getAllLikesFromUser(authorId);
@@ -66,7 +65,7 @@ export class ReactionServiceImpl implements ReactionService {
   }
 
   async getAllRetweetsFromUser(userId: string, authorId: string): Promise<ReactionDTO[]> {
-    const result = await this.repository.isReactionAuthorPublicOrFollowed(userId, authorId);
+    const result = await isUserPublicOrFollowed(userId, authorId);
     if (!result) throw new ForbiddenException();
 
     const reactions = await this.repository.getAllRetweetsFromUser(authorId);
@@ -74,5 +73,4 @@ export class ReactionServiceImpl implements ReactionService {
 
     return reactions;
   }
-
 }

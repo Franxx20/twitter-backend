@@ -1,7 +1,6 @@
 import { Request, Response, Router } from 'express';
 import HttpStatus from 'http-status';
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
-
 import 'express-async-errors';
 
 import { BodyValidation, db, generatePreSignedUrl } from '@utils';
@@ -9,6 +8,7 @@ import { BodyValidation, db, generatePreSignedUrl } from '@utils';
 import { UserRepositoryImpl } from '../repository';
 import { UserService, UserServiceImpl } from '../service';
 import { UserUpdateInputDTO } from '@domains/user/dto';
+import { isUserFollowed } from '@utils/userValidation';
 
 export const userRouter = Router();
 
@@ -45,7 +45,8 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
   const { userId: otherUserId } = req.params;
   const { userId } = res.locals.context;
 
-  const result = await service.isUserFollowed(userId, otherUserId);
+  // const result = await service.isUserFollowed(userId, otherUserId);
+  const result = await isUserFollowed(userId, otherUserId);
   const user = await service.getUser(otherUserId);
 
   return res.status(HttpStatus.OK).json({

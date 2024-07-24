@@ -42,7 +42,7 @@ export class UserServiceImpl implements UserService {
     return users;
   }
 
-  async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {
-    return await this.repository.isUserFollowed(userId, otherUserId);
-  }
+  // async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {
+  //   return await this.repository.isUserFollowed(userId, otherUserId);
+  // }
 }

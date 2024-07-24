@@ -12,5 +12,5 @@ export interface MessageRepository {
     options: CursorPagination
   ) => Promise<MessageDTO[]>;
 
-  isReceiverFollowed: (senderId: string, receiverId: string) => Promise<boolean>;
+  // isReceiverFollowed: (senderId: string, receiverId: string) => Promise<boolean>;
 }

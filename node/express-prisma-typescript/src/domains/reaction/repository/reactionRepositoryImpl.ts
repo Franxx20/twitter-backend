@@ -1,9 +1,8 @@
-import { PrismaClient, ReactionAction, Visibility } from '@prisma/client';
+import { PrismaClient, ReactionAction } from '@prisma/client';
 
 import { ReactionRepository } from '.';
-import { ReactionDTO, CreateReactionDTO } from '../dto';
+import { CreateReactionDTO, ReactionDTO } from '../dto';
 import { ForbiddenException } from '@utils';
-import { ExtendedPostDTO } from '@domains/post/dto';
 
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -150,28 +149,28 @@ export class ReactionRepositoryImpl implements ReactionRepository {
   }
 
   // check this later
-  async isReactionAuthorPublicOrFollowed(userId: string, authorId: string): Promise<boolean> {
-    const author = await this.db.user.findUnique({
-      where: {
-        id: authorId,
-      },
-    });
-
-    if (!author) return false;
-
-    if (author.visibility === Visibility.PUBLIC) return true;
-
-    if (author.visibility === Visibility.HIDDEN) return false;
-
-    const follow = await this.db.follow.findFirst({
-      where: {
-        followerId: userId,
-        followedId: authorId,
-      },
-    });
-
-    return follow !== null;
-  }
+  // async isReactionAuthorPublicOrFollowed(userId: string, authorId: string): Promise<boolean> {
+  //   const author = await this.db.user.findUnique({
+  //     where: {
+  //       id: authorId,
+  //     },
+  //   });
+  //
+  //   if (!author) return false;
+  //
+  //   if (author.visibility === Visibility.PUBLIC) return true;
+  //
+  //   if (author.visibility === Visibility.HIDDEN) return false;
+  //
+  //   const follow = await this.db.follow.findFirst({
+  //     where: {
+  //       followerId: userId,
+  //       followedId: authorId,
+  //     },
+  //   });
+  //
+  //   return follow !== null;
+  // }
 
   async getAuthorIdOfPost(postId: string): Promise<string | null> {
     const authorId = await this.db.post.findUnique({

@@ -10,5 +10,4 @@ export interface PostRepository {
   getAllByDatePaginated: (usedId: string, options: CursorPagination) => Promise<ExtendedPostDTO[]>;
 
   isPostAuthorPublicOrFollowed: (userId: string, authorId: string) => Promise<boolean>;
-
 }

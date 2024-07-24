@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import HttpStatus from 'http-status';
 import 'express-async-errors';
 
-import { db, BodyValidation } from '@utils';
+import { BodyValidation, db } from '@utils';
 
 import { CommentRepositoryImpl } from '../repository';
 import { CommentService, CommentServiceImpl } from '../service';

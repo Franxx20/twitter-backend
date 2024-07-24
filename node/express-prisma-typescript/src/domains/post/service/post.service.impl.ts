@@ -3,9 +3,14 @@ import { CreatePostInputDTO, ExtendedPostDTO, PostDTO, PreSignedUrl } from '../d
 import { PostRepository } from '../repository';
 import { PostService } from '.';
 import { validate } from 'class-validator';
-import { ForbiddenException, InvalidUserException, NotFoundException, generatePreSignedUrls } from '@utils';
+import {
+  ForbiddenException,
+  generatePreSignedUrls,
+  InvalidUserException,
+  isUserPublicOrFollowed,
+  NotFoundException,
+} from '@utils';
 import { CursorPagination } from '@types';
-import { isUserPublicOrFollowed } from '@utils/userValidation';
 
 export class PostServiceImpl implements PostService {
   constructor(private readonly repository: PostRepository) {}
@@ -33,7 +38,7 @@ export class PostServiceImpl implements PostService {
     const post = await this.repository.getById(postId);
 
     if (!post) throw new NotFoundException('post');
-    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, post.authorId);
+    const result = await isUserPublicOrFollowed(userId, post.authorId);
     if (!result) {
       throw new InvalidUserException();
     }
@@ -49,8 +54,7 @@ export class PostServiceImpl implements PostService {
   }
 
   async getPostsByAuthor(userId: any, authorId: string): Promise<ExtendedPostDTO[]> {
-    const result = await this.repository.isPostAuthorPublicOrFollowed(userId, authorId);
-    // const result = await isUserPublicOrFollowed(userId, authorId);
+    const result = await isUserPublicOrFollowed(userId, authorId);
     if (!result) {
       throw new InvalidUserException();
     }

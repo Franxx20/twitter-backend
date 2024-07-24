@@ -3,7 +3,7 @@ import { MessageDTO } from '@domains/message/dto';
 import { CursorPagination } from '@types';
 import { validate } from 'class-validator';
 import { MessageRepository } from '@domains/message/repository';
-import { ForbiddenException, InvalidUserException, NotFoundException } from '@utils';
+import { ForbiddenException, InvalidUserException, isUserFollowed, NotFoundException } from '@utils';
 
 export class MessageServiceImpl implements MessageService {
   constructor(private readonly repository: MessageRepository) {}
@@ -28,8 +28,8 @@ export class MessageServiceImpl implements MessageService {
     receiverId: string,
     options: CursorPagination
   ): Promise<MessageDTO[]> {
-    // return Promise.resolve([]);
-    const result = await this.repository.isReceiverFollowed(senderId, receiverId);
+    const result = await isUserFollowed(senderId, receiverId);
+
     if (!result) throw new InvalidUserException();
 
     const messages = await this.repository.getAllMessagesFromChatPaginated(senderId, receiverId, options);
@@ -39,14 +39,9 @@ export class MessageServiceImpl implements MessageService {
   }
 
   async getMessageById(messageId: string): Promise<MessageDTO> {
-    // return Promise.resolve(undefined);
     const message = await this.repository.getMessageById(messageId);
     if (message === null) throw new NotFoundException('message');
 
     return message;
-  }
-
-  async isReceiverFollowed(senderId: string, receiverId: string): Promise<boolean> {
-    return await this.repository.isReceiverFollowed(senderId, receiverId);
   }
 }

@@ -45,7 +45,6 @@ export class FollowerRepositoryImpl implements FollowerRepository {
   }
 
   async getAllFollows(): Promise<FollowerDTO[]> {
-    // return Promise.resolve([]);
     return await this.db.follow.findMany({});
   }
 }

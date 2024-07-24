@@ -1,5 +1,4 @@
-import { ReactionDTO, CreateReactionDTO } from '../dto';
-import { ExtendedPostDTO } from '@domains/post/dto';
+import { CreateReactionDTO, ReactionDTO } from '../dto';
 
 export interface ReactionRepository {
   create: (userId: string, data: CreateReactionDTO) => Promise<ReactionDTO>;
@@ -13,10 +12,6 @@ export interface ReactionRepository {
 
   getAllLikesFromUser: (userId: string) => Promise<ReactionDTO[]>;
   getAllRetweetsFromUser: (userId: string) => Promise<ReactionDTO[]>;
-
-  // getParentPost: (postId: string) => Promise<ExtendedPostDTO | null>;
-
-  isReactionAuthorPublicOrFollowed: (userId: string, authorId: string) => Promise<boolean>;
 
   getAuthorIdOfPost: (postId: string) => Promise<string | null>;
 }

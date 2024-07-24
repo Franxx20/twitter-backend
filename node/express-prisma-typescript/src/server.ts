@@ -3,15 +3,12 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
-import { Constants, NodeEnv, Logger, UnauthorizedException, NotFoundException, ForbiddenException } from '@utils';
+import { Constants, Logger, NodeEnv } from '@utils';
 import { router } from '@router';
 import { ErrorHandling } from '@utils/errors';
 import { initSocketServer } from '@socketIoServer';
 import * as http from 'node:http';
 import { IncomingMessage, ServerResponse } from 'node:http';
-import { Server } from 'socket.io';
-import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
-import { messageService } from '@domains/message/controller';
 
 export const app = express();
 

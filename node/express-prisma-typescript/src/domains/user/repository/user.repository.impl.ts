@@ -1,11 +1,9 @@
 import { SignupInputDTO } from '@domains/auth/dto';
 
-import { PrismaClient, Visibility } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { OffsetPagination } from '@types';
 import { ExtendedUserDTO, UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 import { UserRepository } from './user.repository';
-
-// import { Visibility } from '@prisma/client';
 
 export class UserRepositoryImpl implements UserRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -85,17 +83,6 @@ export class UserRepositoryImpl implements UserRepository {
     return new ExtendedUserDTO(user);
   }
 
-  async updateVisibility(userId: string, visibility: string): Promise<void> {
-    await this.db.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        visibility: visibility as Visibility,
-      },
-    });
-  }
-
   async updateUser(userId: string, user: UserUpdateInputDTO): Promise<UserUpdateOutputDTO | null> {
     const updatedUser = await this.db.user.update({
       where: {
@@ -116,32 +103,32 @@ export class UserRepositoryImpl implements UserRepository {
     });
   }
 
-  async isUserPublicOrFollowed(userId: string, otherUserId: string): Promise<boolean> {
-    const otherUser = await this.db.user.findUnique({
-      where: {
-        id: otherUserId,
-      },
-    });
-
-    if (otherUser === null) {
-      console.log(`otherUserId ${otherUserId} not found`);
-      return false;
-    }
-
-    if (otherUser.visibility === Visibility.PUBLIC) return true;
-
-    if (otherUser.visibility === Visibility.HIDDEN) return false;
-
-    const follow = await this.db.follow.findFirst({
-      where: {
-        followerId: userId,
-        followedId: otherUserId,
-      },
-    });
-
-    return follow !== null;
-  }
-
+  // async isUserPublicOrFollowed(userId: string, otherUserId: string): Promise<boolean> {
+  //   const otherUser = await this.db.user.findUnique({
+  //     where: {
+  //       id: otherUserId,
+  //     },
+  //   });
+  //
+  //   if (otherUser === null) {
+  //     console.log(`otherUserId ${otherUserId} not found`);
+  //     return false;
+  //   }
+  //
+  //   if (otherUser.visibility === Visibility.PUBLIC) return true;
+  //
+  //   if (otherUser.visibility === Visibility.HIDDEN) return false;
+  //
+  //   const follow = await this.db.follow.findFirst({
+  //     where: {
+  //       followerId: userId,
+  //       followedId: otherUserId,
+  //     },
+  //   });
+  //
+  //   return follow !== null;
+  // }
+  //
   async getUsersContainsUsername(username: string): Promise<UserViewDTO[] | null> {
     // return Promise.resolve(undefined);
     const users = await this.db.user.findMany({
