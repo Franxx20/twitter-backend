@@ -49,6 +49,7 @@ export class CommentRepositoryImpl implements CommentRepository {
     });
   }
 
+  // TODO CHECK
   async getAllCommentsFromPost(postId: string, options: CursorPagination): Promise<CommentDTO[]> {
     const comments = await this.db.post.findMany({
       cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
@@ -63,6 +64,7 @@ export class CommentRepositoryImpl implements CommentRepository {
       },
       where: {
         id: postId,
+
       },
     });
     return comments.map((comment) => new CommentDTO(comment));

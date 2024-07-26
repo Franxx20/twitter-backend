@@ -31,10 +31,11 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     return follows.map((follow) => new FollowerDTO(follow));
   }
 
-  async getById(followId: string): Promise<FollowerDTO | null> {
-    const follow = await this.db.follow.findUnique({
+  async getById(followerId: string, followedId: string): Promise<FollowerDTO | null> {
+    const follow = await this.db.follow.findFirst({
       where: {
-        id: followId,
+        followedId,
+        followerId,
       },
     });
     return follow != null ? new FollowerDTO(follow) : null;

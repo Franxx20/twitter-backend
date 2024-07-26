@@ -28,7 +28,7 @@ export class ForbiddenException extends HttpException {
 
 export class InvalidUserException extends HttpException {
   constructor() {
-    super(HttpStatus.FORBIDDEN, "You don't have permission to perform this action on user");
+    super(HttpStatus.NOT_FOUND, "You don't have permission to perform this action on user");
   }
 }
 

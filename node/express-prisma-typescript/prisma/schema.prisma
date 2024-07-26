@@ -100,6 +100,7 @@ model Post {
 
   comments Post[] @relation("PostToPost")
 
+  // TODO CALCULO POR GROUP BY
   qtyComments Int @default(0)
   qtyLikes    Int @default(0)
   qtyRetweets Int @default(0)

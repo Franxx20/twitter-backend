@@ -101,7 +101,13 @@ userRouter.put(
     const { userId } = res.locals.context;
     const { name, password, visibility, profilePicture } = req.body;
 
-    console.log(`${userId as string} ${name as string}, ${password as string}, ${visibility as string}`);
+
+    // console.log(
+    //   // `${userId as string} ${name as string}, ${password as string}, ${visibility as string}, ${
+    //   //   profilePicture as string
+    //   // }`
+    //   req.body
+    // );
 
     try {
       let url: string = '';

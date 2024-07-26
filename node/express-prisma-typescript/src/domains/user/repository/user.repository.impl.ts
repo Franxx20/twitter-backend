@@ -107,6 +107,7 @@ export class UserRepositoryImpl implements UserRepository {
         ...user,
       },
     });
+   // console.log(user, updatedUser);
 
     if (updatedUser === null) return null;
 
@@ -119,13 +120,14 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getUsersContainsUsername(username: string): Promise<UserViewDTO[]> {
-    return await this.db.user.findMany({
+    const data =  await this.db.user.findMany({
       where: {
         username: {
           contains: username,
         },
       },
     });
+    return data.map((user) => new UserViewDTO(user));
   }
 
   async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {

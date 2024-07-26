@@ -30,11 +30,10 @@ export async function generatePreSignedUrl(image: string): Promise<PreSignedUrl>
   const key: string = `${randomUUID()}_${image}`;
   const s3Command = new PutObjectCommand({
     Bucket: Constants.BUCKET_NAME,
-    Key: key,
+    Key: image,
     ContentType: mimeType,
   });
   const signedUrl = await getSignedUrl(myS3, s3Command, { expiresIn: Constants.PRE_SIGNED_URL_LIFETIME });
-  console.log(signedUrl);
 
   return { signedUrl, key };
 }

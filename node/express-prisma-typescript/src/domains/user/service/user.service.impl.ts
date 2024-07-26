@@ -24,6 +24,7 @@ export class UserServiceImpl implements UserService {
   }
 
   async updateUser(userId: string, user: UserUpdateInputDTO): Promise<UserUpdateOutputDTO | null> {
+    console.log(user)
     if (user.password) {
       user.password = await bcrypt.hash(user.password, Constants.SALT_OR_ROUNDS);
     }
