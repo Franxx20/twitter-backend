@@ -16,7 +16,6 @@ export class UserServiceImpl implements UserService {
   }
 
   async getUserRecommendations(userId: string, options: OffsetPagination): Promise<UserViewDTO[]> {
-    // DONE: make this return only users followed by users the original user follows
     return await this.repository.getRecommendedUsersPaginated(userId, options);
   }
 
@@ -36,13 +35,8 @@ export class UserServiceImpl implements UserService {
   }
 
   async getUsersContainsUsername(username: string): Promise<UserViewDTO[]> {
-    // return Promise.resolve([]);
     const users = await this.repository.getUsersContainsUsername(username);
-    if (users === null) throw new NotFoundException('users');
+    if (!users.length) throw new NotFoundException('users');
     return users;
   }
-
-  // async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {
-  //   return await this.repository.isUserFollowed(userId, otherUserId);
-  // }
 }

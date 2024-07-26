@@ -40,7 +40,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getRecommendedUsersPaginated(userId: string, options: OffsetPagination): Promise<UserViewDTO[]> {
-    const userFollows = await this.db.follow.findMany({
+    const followed = await this.db.follow.findMany({
       where: {
         followerId: userId,
       },
@@ -48,20 +48,35 @@ export class UserRepositoryImpl implements UserRepository {
         followedId: true,
       },
     });
-    const followedIds = userFollows.map((follow) => follow.followedId);
+    const followedIDs = followed.map((followed) => followed.followedId);
+
+    const publicUsers = await this.db.user.findMany({
+      where: {
+        id: {
+          notIn: [...followedIDs, userId],
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    const publicUsersIDs: string[] = publicUsers.map((publicUsersID) => publicUsersID.id);
+
+    const recommendedUsersIDs: string[] = [...followedIDs, ...publicUsersIDs];
 
     const users = await this.db.user.findMany({
-      take: options.limit ? options.limit : undefined,
-      skip: options.skip ? options.skip : undefined,
+      where: {
+        id: { in: recommendedUsersIDs },
+      },
+      take: options.limit ?? undefined,
+      skip: options.skip ?? undefined,
       orderBy: [
         {
           id: 'asc',
         },
       ],
-      where: {
-        id: { in: followedIds },
-      },
     });
+
     return users.map((user) => new UserViewDTO(user));
   }
 
@@ -94,7 +109,7 @@ export class UserRepositoryImpl implements UserRepository {
     });
 
     if (updatedUser === null) return null;
-    // Create a UserUpdateOutputDTO and convert null values to undefined
+
     return new UserUpdateOutputDTO({
       id: updatedUser.id,
       name: updatedUser.name ?? undefined,
@@ -103,45 +118,14 @@ export class UserRepositoryImpl implements UserRepository {
     });
   }
 
-  // async isUserPublicOrFollowed(userId: string, otherUserId: string): Promise<boolean> {
-  //   const otherUser = await this.db.user.findUnique({
-  //     where: {
-  //       id: otherUserId,
-  //     },
-  //   });
-  //
-  //   if (otherUser === null) {
-  //     console.log(`otherUserId ${otherUserId} not found`);
-  //     return false;
-  //   }
-  //
-  //   if (otherUser.visibility === Visibility.PUBLIC) return true;
-  //
-  //   if (otherUser.visibility === Visibility.HIDDEN) return false;
-  //
-  //   const follow = await this.db.follow.findFirst({
-  //     where: {
-  //       followerId: userId,
-  //       followedId: otherUserId,
-  //     },
-  //   });
-  //
-  //   return follow !== null;
-  // }
-  //
-  async getUsersContainsUsername(username: string): Promise<UserViewDTO[] | null> {
-    // return Promise.resolve(undefined);
-    const users = await this.db.user.findMany({
+  async getUsersContainsUsername(username: string): Promise<UserViewDTO[]> {
+    return await this.db.user.findMany({
       where: {
         username: {
           contains: username,
         },
       },
     });
-
-    if (!users.length) return null;
-
-    return users;
   }
 
   async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {

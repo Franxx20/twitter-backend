@@ -3,7 +3,7 @@ import { CommentRepository } from '@domains/comment/repository/comment.repositor
 import { CommentService } from '@domains/comment/service/comment.service';
 
 import { validate } from 'class-validator';
-import { CreatePostInputDTO, ExtendedPostDTO } from '@domains/post/dto';
+import { CreatePostDTO, ExtendedPostDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
 import { ForbiddenException, InvalidUserException, isUserPublicOrFollowed, NotFoundException } from '@utils';
 import { OffsetPagination } from '@types';
@@ -11,7 +11,7 @@ import { OffsetPagination } from '@types';
 export class CommentServiceImpl implements CommentService {
   constructor(private readonly repository: CommentRepository) {}
 
-  async createComment(userId: string, parentPostId: string, data: CreatePostInputDTO): Promise<CommentDTO> {
+  async createComment(userId: string, parentPostId: string, data: CreatePostDTO): Promise<CommentDTO> {
     await validate(data);
 
     return await this.repository.create(userId, parentPostId, data);

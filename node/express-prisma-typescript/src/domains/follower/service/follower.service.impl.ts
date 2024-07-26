@@ -1,18 +1,36 @@
 import { FollowerService } from '@domains/follower/service/follower.service';
-import { CreateFollowInputDTO, FollowerDTO } from '@domains/follower/dto';
+import { CreateFollow, DeleteFollowDTO, FollowerDTO, GetFollowDTO } from '@domains/follower/dto';
 import { validate } from 'class-validator';
-import { ForbiddenException, NotFoundException } from '@utils';
+import { ForbiddenException, NotFoundException, ValidationException } from '@utils';
 import { FollowerRepository } from '@domains/follower/repository';
 
 export class FollowerServiceImpl implements FollowerService {
   constructor(private readonly repository: FollowerRepository) {}
 
-  async createFollower(followerId: string, data: CreateFollowInputDTO): Promise<FollowerDTO> {
-    await validate(data);
-    return await this.repository.create(followerId, data);
+  async createFollower(followerId: string, followedId: string): Promise<FollowerDTO> {
+    const data = new CreateFollow(followerId, followedId);
+    const errors = await validate(data, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
+
+    if (errors.length > 0) {
+      throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
+    }
+    return await this.repository.create(data);
   }
 
   async deleteFollower(followerId: string, followId: string): Promise<void> {
+    const data = new DeleteFollowDTO(followerId, followId);
+    const errors = await validate(data, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
+
+    if (errors.length > 0) {
+      throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
+    }
+
     const follow = await this.repository.getById(followId);
     if (!follow) throw new NotFoundException('follow');
     if (follow.followerId !== followerId) throw new ForbiddenException();
@@ -20,13 +38,22 @@ export class FollowerServiceImpl implements FollowerService {
   }
 
   async getFollow(followerId: string, followId: string): Promise<FollowerDTO> {
+    const data = new GetFollowDTO(followerId, followId);
+    const errors = await validate(data, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
+
+    if (errors.length > 0) {
+      throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
+    }
+
     const follow = await this.repository.getById(followId);
     if (!follow) throw new NotFoundException('follow');
     return follow;
   }
 
   async getAllFollows(): Promise<FollowerDTO[]> {
-    // return Promise.resolve([]);
     return await this.repository.getAllFollows();
   }
 }

@@ -1,8 +1,8 @@
-import { CreateReactionDTO, ReactionDeleteDTO, ReactionDTO } from '@domains/reaction/dto';
+import { CreateReactionDTO, DeleteReactionDTO, ReactionDTO } from '@domains/reaction/dto';
 
 export interface ReactionService {
-  createReaction: (userId: string, reaction: CreateReactionDTO) => Promise<ReactionDTO>;
-  deleteReaction: (userId: string, reactionDeleteDTO: ReactionDeleteDTO) => Promise<void>;
+  createReaction: (reaction: CreateReactionDTO) => Promise<ReactionDTO>;
+  deleteReaction: (reactionDeleteDTO: DeleteReactionDTO) => Promise<void>;
 
   getReaction: (reactionId: string) => Promise<ReactionDTO>;
   getAllReactions: () => Promise<ReactionDTO[]>;

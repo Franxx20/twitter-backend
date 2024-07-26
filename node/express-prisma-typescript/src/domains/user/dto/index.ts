@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 import { Visibility } from '@prisma/client';
 import { Transform } from 'class-transformer';
 
@@ -19,13 +19,6 @@ export class UserDTO {
 
   createdAt: Date;
   updatedAt: Date;
-}
-
-export class VisibilityInputDTO {
-  @IsEnum(Visibility)
-  @IsNotEmpty()
-  @Transform(({ value }) => Visibility[value as keyof typeof Visibility])
-  visibility: Visibility = 'PUBLIC';
 }
 
 export class UserUpdateInputDTO {

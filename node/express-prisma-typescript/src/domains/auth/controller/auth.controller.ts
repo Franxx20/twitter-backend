@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import HttpStatus from 'http-status';
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors';
@@ -14,18 +14,26 @@ export const authRouter = Router();
 // Use dependency injection
 const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db));
 
-authRouter.post('/signup', BodyValidation(SignupInputDTO), async (req: Request, res: Response) => {
+authRouter.post('/signup', BodyValidation(SignupInputDTO), async (req: Request, res: Response, next: NextFunction) => {
   const data = req.body;
 
-  const token = await service.signup(data);
+  try {
+    const token = await service.signup(data);
 
-  return res.status(HttpStatus.CREATED).json(token);
+    return res.status(HttpStatus.CREATED).json(token);
+  } catch (e) {
+    next(e);
+  }
 });
 
-authRouter.post('/login', BodyValidation(LoginInputDTO), async (req: Request, res: Response) => {
+authRouter.post('/login', BodyValidation(LoginInputDTO), async (req: Request, res: Response, next: NextFunction) => {
   const data = req.body;
 
-  const token = await service.login(data);
+  try {
+    const token = await service.login(data);
 
-  return res.status(HttpStatus.OK).json(token);
+    return res.status(HttpStatus.OK).json(token);
+  } catch (e) {
+    next(e);
+  }
 });

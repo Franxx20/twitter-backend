@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { Reaction, ReactionAction } from '@prisma/client';
 
 export class ReactionDTO {
@@ -17,38 +17,95 @@ export class ReactionDTO {
   createdAt: Date;
 }
 
-export class ReactionInputDTO {
+export class ReactionActionDTO {
   @IsEnum(ReactionAction)
   @IsNotEmpty()
   action!: ReactionAction;
 }
 
-export class ReactionDeleteDTO {
-  constructor(postId: string, reaction: ReactionInputDTO) {
+export class DeleteReactionDTO {
+  constructor(userId: string, postId: string, action: ReactionAction) {
+    this.userId = userId;
     this.postId = postId;
-    this.action = reaction.action;
+    this.action = action;
   }
 
   @IsEnum(ReactionAction)
   @IsNotEmpty()
-  action!: ReactionAction;
+  action: ReactionAction;
 
   @IsString()
   @IsNotEmpty()
-  postId!: string;
+  postId: string;
+
+  @IsString()
+  @IsUUID()
+  @IsNotEmpty()
+  userId: string;
+}
+
+export class GetReactionDTO {
+  constructor(reactionId: string) {
+    this.reactionId = reactionId;
+  }
+
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  reactionId: string;
+}
+
+export class GetReactionsFromUserDTO {
+  constructor(userId: string, authorId: string) {
+    this.userId = userId;
+    this.authorId = authorId;
+  }
+
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  userId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  authorId: string;
+}
+export class GetReactionsFromPostDTO {
+  constructor(userId: string, postId: string) {
+    this.userId = userId;
+    this.postId = postId;
+  }
+
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  userId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  postId: string;
 }
 
 export class CreateReactionDTO {
-  constructor(postId: string, reaction: ReactionInputDTO) {
+  constructor(userId: string, postId: string, reaction: ReactionActionDTO) {
+    this.userId = userId;
     this.postId = postId;
     this.action = reaction.action;
   }
 
   @IsEnum(ReactionAction)
   @IsNotEmpty()
-  action!: ReactionAction;
+  action: ReactionAction;
 
+  @IsUUID()
   @IsString()
   @IsNotEmpty()
-  postId!: string;
+  postId: string;
+
+  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 }

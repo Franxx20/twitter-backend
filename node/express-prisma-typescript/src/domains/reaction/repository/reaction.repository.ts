@@ -1,9 +1,9 @@
 import { CreateReactionDTO, ReactionDTO } from '../dto';
+import { ReactionAction } from '@prisma/client';
 
 export interface ReactionRepository {
   create: (userId: string, data: CreateReactionDTO) => Promise<ReactionDTO>;
-  delete: (reactionId: string) => Promise<void>;
-
+  delete: (authorId: string, postId: string, reactionAction: ReactionAction) => Promise<void>;
   /// cambiar el retorno de los metodos que devuelvan listas para que no devuelvan null.
   getByReactionId: (reactionId: string) => Promise<ReactionDTO | null>;
   getAllReactionsFromUser: (userId: string) => Promise<ReactionDTO[]>;

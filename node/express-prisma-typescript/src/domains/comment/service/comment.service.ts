@@ -1,9 +1,9 @@
-import { CreatePostInputDTO, ExtendedPostDTO } from '@domains/post/dto';
+import { CreatePostDTO, ExtendedPostDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
 import { OffsetPagination } from '@types';
 
 export interface CommentService {
-  createComment: (userId: string, postId: string, data: CreatePostInputDTO) => Promise<CommentDTO>;
+  createComment: (userId: string, postId: string, data: CreatePostDTO) => Promise<CommentDTO>;
   deleteComment: (userId: string, postId: string) => Promise<void>;
 
   getComment: (userId: string, postId: string) => Promise<CommentDTO>;

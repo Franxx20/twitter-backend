@@ -50,14 +50,24 @@ export class ReactionRepositoryImpl implements ReactionRepository {
       });
     }
 
-    // console.log(reaction, new ReactionDTO(reaction));
     return new ReactionDTO(reaction);
   }
 
-  async delete(reactionId: string): Promise<void> {
+  async delete(authorId: string, postId: string, reactionAction: ReactionAction): Promise<void> {
+    const reactionId = await this.db.reaction.findFirst({
+      where: {
+        authorId,
+        postId,
+        action: reactionAction,
+      },
+      select: {
+        id: true,
+      },
+    });
+
     const deletedReaction = await this.db.reaction.delete({
       where: {
-        id: reactionId,
+        id: reactionId?.id,
       },
     });
     if (deletedReaction.action === ReactionAction.LIKE) {
@@ -147,30 +157,6 @@ export class ReactionRepositoryImpl implements ReactionRepository {
 
     return retweets.map((retweet) => new ReactionDTO(retweet));
   }
-
-  // check this later
-  // async isReactionAuthorPublicOrFollowed(userId: string, authorId: string): Promise<boolean> {
-  //   const author = await this.db.user.findUnique({
-  //     where: {
-  //       id: authorId,
-  //     },
-  //   });
-  //
-  //   if (!author) return false;
-  //
-  //   if (author.visibility === Visibility.PUBLIC) return true;
-  //
-  //   if (author.visibility === Visibility.HIDDEN) return false;
-  //
-  //   const follow = await this.db.follow.findFirst({
-  //     where: {
-  //       followerId: userId,
-  //       followedId: authorId,
-  //     },
-  //   });
-  //
-  //   return follow !== null;
-  // }
 
   async getAuthorIdOfPost(postId: string): Promise<string | null> {
     const authorId = await this.db.post.findUnique({

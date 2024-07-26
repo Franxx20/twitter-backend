@@ -1,5 +1,5 @@
 import { MessageRepository } from '@domains/message/repository/message.repository';
-import { MessageDTO } from '@domains/message/dto';
+import { GetChatMessagesDTO, MessageDTO } from '@domains/message/dto';
 import { CursorPagination } from '@types';
 import { PrismaClient } from '@prisma/client';
 
@@ -24,12 +24,7 @@ export class MessageRepositoryImpl implements MessageRepository {
     });
   }
 
-  async getAllMessagesFromChatPaginated(
-    senderId: string,
-    receiverId: string,
-    options: CursorPagination
-  ): Promise<MessageDTO[]> {
-    // return Promise.resolve([]);
+  async getAllMessagesFromChatPaginated(data: GetChatMessagesDTO, options: CursorPagination): Promise<MessageDTO[]> {
     const messages = await this.db.message.findMany({
       cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
@@ -38,8 +33,8 @@ export class MessageRepositoryImpl implements MessageRepository {
         createdAt: 'asc',
       },
       where: {
-        senderId,
-        receiverId,
+        senderId: data.senderId,
+        receiverId: data.receiverId,
       },
     });
 
@@ -57,14 +52,4 @@ export class MessageRepositoryImpl implements MessageRepository {
 
     return new MessageDTO(message);
   }
-
-  // async isReceiverFollowed(senderId: string, receiverId: string): Promise<boolean> {
-  //   const follow = await this.db.follow.findFirst({
-  //     where: {
-  //       followerId: senderId,
-  //       followedId: receiverId,
-  //     },
-  //   });
-  //   return follow !== null;
-  // }
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class MessageDTO {
   constructor(message: MessageDTO) {
@@ -9,13 +9,60 @@ export class MessageDTO {
 
   @IsNotEmpty()
   @IsString()
+  @IsUUID()
   senderId: string;
 
   @IsNotEmpty()
   @IsString()
+  @IsUUID()
   receiverId: string;
 
   @IsNotEmpty()
   @IsString()
   content: string;
+}
+
+export class DeleteMessageDTO {
+  constructor(senderId: string, messageId: string) {
+    this.senderId = senderId;
+    this.messageId = messageId;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  senderId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  messageId: string;
+}
+
+export class GetChatMessagesDTO {
+  constructor(senderId: string, receiverId: string) {
+    this.senderId = senderId;
+    this.receiverId = receiverId;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  senderId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  receiverId: string;
+}
+
+export class GetMessageById {
+  constructor(messageId: string) {
+    this.messageId = messageId;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  messageId: string;
 }

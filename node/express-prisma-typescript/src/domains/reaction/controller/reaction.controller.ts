@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import HttpStatus from 'http-status';
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors';
@@ -7,7 +7,7 @@ import { BodyValidation, db } from '@utils';
 
 import { ReactionRepositoryImpl } from '../repository';
 import { ReactionService, ReactionServiceImpl } from '@domains/reaction/service';
-import { CreateReactionDTO, ReactionDeleteDTO, ReactionInputDTO } from '@domains/reaction/dto';
+import { CreateReactionDTO, DeleteReactionDTO, ReactionActionDTO } from '@domains/reaction/dto';
 
 export const reactionRouter = Router();
 
@@ -18,46 +18,66 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
 // both should be stored in the same table and
 // using the endpoints POST api/reaction/:post_id and DELETE api/reaction/:post_id.
 
-// Deberia checkear que el usuario no le de like
-// o Retweet al mismo post mas de una vez?
+reactionRouter.get('/likes', async (req: Request, res: Response, next: NextFunction) => {
+  const { authorId } = req.query;
+  const { userId } = res.locals.context;
 
-reactionRouter.get('/likes', async (req: Request, res: Response) => {
+  try {
+    const likes = await service.getAllLikesFromUser(userId, authorId as string);
+
+    return res.status(HttpStatus.OK).json(likes);
+  } catch (e) {
+    next(e);
+  }
+});
+
+reactionRouter.get('/retweets', async (req: Request, res: Response, next: NextFunction) => {
   // const { userId: authorId } = req.params;
   const { authorId } = req.query;
   const { userId } = res.locals.context;
 
-  const likes = await service.getAllLikesFromUser(userId, authorId as string);
+  try {
+    const retweets = await service.getAllRetweetsFromUser(userId, authorId as string);
 
-  return res.status(HttpStatus.OK).json(likes);
+    return res.status(HttpStatus.OK).json(retweets);
+  } catch (e) {
+    next(e);
+  }
 });
 
-reactionRouter.get('/retweets', async (req: Request, res: Response) => {
-  // const { userId: authorId } = req.params;
-  const { authorId } = req.query;
-  const { userId } = res.locals.context;
+reactionRouter.post(
+  '/:post_id',
+  BodyValidation(ReactionActionDTO),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = res.locals.context;
+    const data = req.body;
+    const { post_id: postId } = req.params;
 
-  const retweets = await service.getAllRetweetsFromUser(userId, authorId as string);
+    try {
+      const reaction = await service.createReaction(new CreateReactionDTO(userId, postId, data));
 
-  return res.status(HttpStatus.OK).json(retweets);
-});
+      return res.status(HttpStatus.OK).json(reaction);
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
-reactionRouter.post('/:post_id', BodyValidation(ReactionInputDTO), async (req: Request, res: Response) => {
-  const { userId } = res.locals.context;
-  const data = req.body;
-  const { post_id: postId } = req.params;
+reactionRouter.delete(
+  '/:post_id',
+  BodyValidation(ReactionActionDTO),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = res.locals.context;
+    const data = req.body;
 
-  const reaction = await service.createReaction(userId, new CreateReactionDTO(postId, data));
+    const { post_id: postId } = req.params;
 
-  return res.status(HttpStatus.OK).json(reaction);
-});
+    try {
+      await service.deleteReaction(new DeleteReactionDTO(userId, postId, data.action));
 
-reactionRouter.delete('/:post_id', BodyValidation(ReactionInputDTO), async (req: Request, res: Response) => {
-  const { userId } = res.locals.context;
-  const data = req.body;
-
-  const { post_id: postId } = req.params;
-
-  await service.deleteReaction(userId, new ReactionDeleteDTO(postId, data));
-
-  return res.status(HttpStatus.OK).json({ message: `Deleted reaction from ${postId}` });
-});
+      return res.status(HttpStatus.OK).json({ message: `Deleted reaction from ${postId}` });
+    } catch (e) {
+      next(e);
+    }
+  }
+);

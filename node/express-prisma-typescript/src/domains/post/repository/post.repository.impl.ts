@@ -3,19 +3,18 @@ import { PrismaClient, Visibility } from '@prisma/client';
 import { CursorPagination } from '@types';
 
 import { PostRepository } from '.';
-import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto';
+import { CreatePostDTO, ExtendedPostDTO, PostDTO } from '../dto';
 
 export class PostRepositoryImpl implements PostRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async create(userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
+  async create(postData: CreatePostDTO): Promise<PostDTO> {
     const post = await this.db.post.create({
       data: {
-        authorId: userId,
-        ...data,
+        authorId: postData.userId,
+        ...postData,
       },
     });
-    // console.log(post, new PostDTO(post));
     return new PostDTO(post);
   }
 

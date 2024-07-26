@@ -1,7 +1,18 @@
-import { ArrayMaxSize, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ArrayMaxSize, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { ExtendedUserDTO } from '@domains/user/dto';
 
-export class CreatePostInputDTO {
+export class CreatePostDTO {
+  constructor(userId: string, content: string, images: string[]) {
+    this.userId = userId;
+    this.content = content;
+    this.images = images;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  userId!: string;
+
   @IsString()
   @IsNotEmpty()
   @MaxLength(240)
@@ -29,6 +40,57 @@ export class PostDTO {
   content: string;
   images: string[];
   createdAt: Date;
+}
+
+export class PostsByAuthorDTO {
+  constructor(userId: string, authorId: string) {
+    this.userId = userId;
+    this.authorId = authorId;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  userId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  authorId: string;
+}
+
+export class GetPostDTO {
+  constructor(userId: string, postId: string) {
+    this.userId = userId;
+    this.postId = postId;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  userId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  postId: string;
+}
+
+export class DeletePostDTO {
+  constructor(userId: string, postId: string) {
+    this.userId = userId;
+    this.postId = postId;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  userId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  postId: string;
 }
 
 export interface PreSignedUrl {

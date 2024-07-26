@@ -1,7 +1,7 @@
-import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto';
+import { ExtendedPostDTO, PostDTO } from '../dto';
 
 export interface PostService {
-  createPost: (userId: string, body: CreatePostInputDTO) => Promise<PostDTO>;
+  createPost: (userId: string, content: string, images: string[]) => Promise<PostDTO>;
   deletePost: (userId: string, postId: string) => Promise<void>;
   getPost: (userId: string, postId: string) => Promise<PostDTO>;
   getLatestPosts: (
@@ -12,5 +12,5 @@ export interface PostService {
       after?: string;
     }
   ) => Promise<ExtendedPostDTO[]>;
-  getPostsByAuthor: (userId: any, authorId: string) => Promise<ExtendedPostDTO[]>;
+  getPostsByAuthor: (userId: string, authorId: string) => Promise<ExtendedPostDTO[]>;
 }

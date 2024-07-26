@@ -1,15 +1,22 @@
 // import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-export class CreateFollowInputDTO {
-  constructor(followerId: string) {
-    this.followedId = followerId;
+export class CreateFollow {
+  constructor(followerId: string, followedId: string) {
+    this.followerId = followerId;
+    this.followedId = followedId;
   }
 
   @IsString()
   @IsNotEmpty()
+  @IsUUID()
   followedId!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  followerId!: string;
 }
 
 export class FollowerDTO {
@@ -24,4 +31,38 @@ export class FollowerDTO {
   followerId: string;
   followedId: string;
   createdAt: Date;
+}
+
+export class GetFollowDTO {
+  constructor(follower: string, follow: string) {
+    this.follower = follower;
+    this.follow = follow;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  follower: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  follow: string;
+}
+
+export class DeleteFollowDTO {
+  constructor(follower: string, follow: string) {
+    this.follower = follower;
+    this.follow = follow;
+  }
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  follower: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID()
+  follow: string;
 }
