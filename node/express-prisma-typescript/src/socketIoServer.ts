@@ -3,6 +3,7 @@ import { Constants, ForbiddenException, isUserFollowed, NotFoundException, Unaut
 import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
 import { messageService } from '@domains/message/controller';
 import http, { IncomingMessage, ServerResponse } from 'node:http';
+import { MessageDTO } from '@domains/message/dto';
 
 export const initSocketServer = (httpServer: http.Server<typeof IncomingMessage, typeof ServerResponse>): void => {
   const io = new Server(httpServer, {
@@ -46,13 +47,14 @@ export const initSocketServer = (httpServer: http.Server<typeof IncomingMessage,
       const senderId = socket.data.userId;
 
       if (await isUserFollowed(senderId, receiverId)) {
-        io.to(senderId).to(receiverId).emit('message', {
-          message: content,
-          from: receiverId,
+        io.to(receiverId).to(senderId).emit('message', {
+          content,
+          senderId,
           receiverId,
         });
 
-        await messageService.create({ senderId, receiverId, content });
+        const data = new MessageDTO({ senderId, receiverId, content });
+        await messageService.create(data);
       } else {
         throw new ForbiddenException();
       }
