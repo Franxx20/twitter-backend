@@ -6,7 +6,7 @@ import cors from 'cors';
 import { Constants, Logger, NodeEnv } from '@utils';
 import { router } from '@router';
 import { ErrorHandling } from '@utils/errors';
-import { initSocketServer } from '@socketIoServer';
+import { initSocketServer } from '@utils/socketIoServer';
 import * as http from 'node:http';
 import { IncomingMessage, ServerResponse } from 'node:http';
 

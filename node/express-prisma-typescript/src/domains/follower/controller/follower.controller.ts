@@ -5,7 +5,7 @@ import { db } from '@utils';
 import { FollowerRepositoryImpl } from '../repository';
 
 import { FollowerService, FollowerServiceImpl } from '../service';
-import { CreateFollow, FollowerDTO } from '../dto';
+import { FollowerDTO } from '../dto';
 import HttpStatus from 'http-status';
 
 export const followerRouter: Router = Router();
@@ -14,16 +14,18 @@ export const followerRouter: Router = Router();
 const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryImpl(db));
 
 followerRouter.post('/follow/:user_id', async (req: Request, res: Response, next: NextFunction) => {
-  const { userId: followerId } = res.locals.context;
-  const { user_id: followedId } = req.params;
+  // const { userId: followerId } = res.locals.context;
+  // const { user_id: followedId } = req.params;
+  const followerId: string = res.locals.context.userId;
+  const followedId: string = req.params.user_id;
 
   try {
     const follow: FollowerDTO = await service.createFollower(followerId, followedId);
 
-    console.log(`${followerId as string} wants to follow ${followedId}`);
+    console.log(`${followerId} wants to follow ${followedId}`);
 
     return res.status(HttpStatus.CREATED).json({
-      message: `${followerId as string} Following ${followedId}`,
+      message: `${followerId} Following ${followedId}`,
       follow,
     });
   } catch (e) {
@@ -40,16 +42,18 @@ followerRouter.get('/', async (req: Request, res: Response, next: NextFunction) 
 });
 
 followerRouter.post('/unfollow/:user_id', async (req: Request, res: Response, next: NextFunction) => {
-  const { userId: followerId } = res.locals.context;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { user_id: followedId } = req.params;
+  // const { userId: followerId } = res.locals.context;
+  // // eslint-disable-next-line @typescript-eslint/naming-convention
+  // const { user_id: followedId } = req.params;
+  const followerId: string = res.locals.context.userId;
+  const followedId: string = req.params.user_id;
 
   try {
-    console.log(`${followerId as string} wants to unfollow ${followedId}`);
+    console.log(`${followerId} wants to unfollow ${followedId}`);
 
     await service.deleteFollower(followerId, followedId);
 
-    return res.status(HttpStatus.OK).send(`${followerId as string} unfollowed (deleted)  Follower ${followedId}`);
+    return res.status(HttpStatus.OK).send(`${followerId} unfollowed (deleted)  Follower ${followedId}`);
   } catch (e) {
     next(e);
   }

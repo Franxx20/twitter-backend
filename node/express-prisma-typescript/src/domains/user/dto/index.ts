@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { Visibility } from '@prisma/client';
 import { Transform } from 'class-transformer';
 

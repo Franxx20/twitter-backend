@@ -6,5 +6,5 @@ export * from './validation';
 export * from './errors';
 export * from './myaws';
 export * from './userValidation';
+export * from './socketIoServer'
 // this line breaks the server
-// export * from './mySocketIo';

@@ -30,7 +30,9 @@
     "es2022"
   ],
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "jest.config.ts",
+    "__test__"
   ],
   "exclude": [
     "node_modules"

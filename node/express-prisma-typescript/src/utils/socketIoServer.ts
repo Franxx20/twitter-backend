@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { Constants, ForbiddenException, isUserFollowed, NotFoundException, UnauthorizedException } from '@utils';
+import { Constants, ForbiddenException, isUserFollowed, NotFoundException, UnauthorizedException } from '@utils/index';
 import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
 import { messageService } from '@domains/message/controller';
 import http, { IncomingMessage, ServerResponse } from 'node:http';
