@@ -1,6 +1,6 @@
 import { NotFoundException } from '@utils/errors';
 import { OffsetPagination } from 'types';
-import { UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
+import { UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 import { UserRepository } from '../repository';
 import { UserService } from './user.service';
 import bcrypt from 'bcrypt';
@@ -19,20 +19,25 @@ export class UserServiceImpl implements UserService {
     return await this.repository.getRecommendedUsersPaginated(userId, options);
   }
 
-  async deleteUser(userId: string): Promise<void> {
-    await this.repository.delete(userId);
+  async deleteUser(userId: string): Promise<UserDTO> {
+    const deletedUser = await this.repository.delete(userId);
+
+    return deletedUser;
   }
 
-  async updateUser(userId: string, user: UserUpdateInputDTO): Promise<UserUpdateOutputDTO | null> {
-    console.log(user)
-    if (user.password) {
-      user.password = await bcrypt.hash(user.password, Constants.SALT_OR_ROUNDS);
+  async updateUser(userId: string, userUpdateData: UserUpdateInputDTO): Promise<UserUpdateOutputDTO | null> {
+    const user = await this.repository.getById(userId);
+    if (!user) throw new NotFoundException('user');
+
+    console.log(userUpdateData);
+    if (userUpdateData.password) {
+      userUpdateData.password = await bcrypt.hash(userUpdateData.password, Constants.SALT_OR_ROUNDS);
     }
-    if (user.profilePicture) {
-      const preSignedUrl = await generatePreSignedUrl(user.profilePicture);
-      user.profilePicture = preSignedUrl.key;
+    if (userUpdateData.profilePicture) {
+      const preSignedUrl = await generatePreSignedUrl(userUpdateData.profilePicture);
+      userUpdateData.profilePicture = preSignedUrl.key;
     }
-    return await this.repository.updateUser(userId, user);
+    return await this.repository.updateUser(userId, userUpdateData);
   }
 
   async getUsersContainsUsername(username: string): Promise<UserViewDTO[]> {

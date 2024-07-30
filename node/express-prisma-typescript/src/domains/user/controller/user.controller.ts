@@ -97,21 +97,12 @@ userRouter.put(
   '/update',
   BodyValidation(UserUpdateInputDTO),
   async (req: Request, res: Response, next: NextFunction) => {
-    // Obtener el userId del contexto (por ejemplo, desde el token JWT)
     const { userId } = res.locals.context;
     const { name, password, visibility, profilePicture } = req.body;
 
-
-    // console.log(
-    //   // `${userId as string} ${name as string}, ${password as string}, ${visibility as string}, ${
-    //   //   profilePicture as string
-    //   // }`
-    //   req.body
-    // );
-
     try {
       let url: string = '';
-      const user = await service.updateUser(userId, new UserUpdateInputDTO(name, password, visibility, profilePicture));
+      const user = await service.updateUser(userId, { name, password, visibility, profilePicture });
       if (user?.profilePicture) {
         const preSignedUrl = await generatePreSignedUrl(user.profilePicture);
         url = preSignedUrl.signedUrl;

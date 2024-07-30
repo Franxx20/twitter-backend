@@ -23,10 +23,9 @@ describe('Auth Service Impl', () => {
   let authService: AuthService;
   let userRepositoryMock: jest.Mocked<UserRepositoryImpl>;
 
-  beforeEach((done) => {
+  beforeEach(() => {
     userRepositoryMock = new UserRepositoryImpl(db) as jest.Mocked<UserRepositoryImpl>;
     authService = new AuthServiceImpl(userRepositoryMock);
-    done();
   });
 
   afterAll((done) => {

@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Visibility } from '@prisma/client';
 import { Transform } from 'class-transformer';
 
@@ -52,6 +52,7 @@ export class UserUpdateOutputDTO {
     this.name = user.name;
     this.profilePicture = user.profilePicture;
     this.visibility = user.visibility;
+    this.passwordIsUpdated = user.passwordIsUpdated;
   }
 
   @IsOptional()
@@ -69,6 +70,10 @@ export class UserUpdateOutputDTO {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  passwordIsUpdated?: boolean = false;
 }
 
 export class ExtendedUserDTO extends UserDTO {

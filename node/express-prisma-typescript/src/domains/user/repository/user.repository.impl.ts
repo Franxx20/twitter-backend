@@ -31,12 +31,14 @@ export class UserRepositoryImpl implements UserRepository {
     return new UserViewDTO(user);
   }
 
-  async delete(userId: string): Promise<void> {
-    await this.db.user.delete({
+  async delete(userId: string): Promise<UserDTO> {
+    const deletedUser = await this.db.user.delete({
       where: {
         id: userId,
       },
     });
+
+    return deletedUser;
   }
 
   async getRecommendedUsersPaginated(userId: string, options: OffsetPagination): Promise<UserViewDTO[]> {
@@ -107,8 +109,6 @@ export class UserRepositoryImpl implements UserRepository {
         ...user,
       },
     });
-   // console.log(user, updatedUser);
-
     if (updatedUser === null) return null;
 
     return new UserUpdateOutputDTO({
@@ -116,11 +116,12 @@ export class UserRepositoryImpl implements UserRepository {
       name: updatedUser.name ?? undefined,
       profilePicture: updatedUser.profilePicture ?? undefined,
       visibility: updatedUser.visibility ?? undefined,
+      passwordIsUpdated: updatedUser.password ? true : undefined,
     });
   }
 
   async getUsersContainsUsername(username: string): Promise<UserViewDTO[]> {
-    const data =  await this.db.user.findMany({
+    const data = await this.db.user.findMany({
       where: {
         username: {
           contains: username,
