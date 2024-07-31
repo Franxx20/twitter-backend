@@ -4,7 +4,8 @@ import { UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '.
 import { UserRepository } from '../repository';
 import { UserService } from './user.service';
 import bcrypt from 'bcrypt';
-import { Constants, generatePreSignedUrl } from '@utils';
+import { Constants, db, generatePreSignedUrl } from '@utils';
+import { Visibility } from '@prisma/client';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly repository: UserRepository) {}
@@ -16,13 +17,13 @@ export class UserServiceImpl implements UserService {
   }
 
   async getUserRecommendations(userId: string, options: OffsetPagination): Promise<UserViewDTO[]> {
-    return await this.repository.getRecommendedUsersPaginated(userId, options);
+    const users = await this.repository.getRecommendedUsersPaginated(userId, options);
+    if (!users.length) throw new NotFoundException('users');
+    return users;
   }
 
   async deleteUser(userId: string): Promise<UserDTO> {
-    const deletedUser = await this.repository.delete(userId);
-
-    return deletedUser;
+    return await this.repository.delete(userId);
   }
 
   async updateUser(userId: string, userUpdateData: UserUpdateInputDTO): Promise<UserUpdateOutputDTO | null> {
@@ -45,4 +46,6 @@ export class UserServiceImpl implements UserService {
     if (!users.length) throw new NotFoundException('users');
     return users;
   }
+
+
 }

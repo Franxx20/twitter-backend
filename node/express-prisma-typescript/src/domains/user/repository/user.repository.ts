@@ -11,4 +11,7 @@ export interface UserRepository {
   updateUser: (userId: string, user: UserUpdateInputDTO) => Promise<UserUpdateOutputDTO | null>;
 
   getUsersContainsUsername: (username: string) => Promise<UserViewDTO[]>;
+
+  isUserPublicOrFollowed: (followerID: string, followedID: string) => Promise<boolean>;
+  isUserFollowed: (followerID: string, followedID: string) => Promise<boolean>;
 }

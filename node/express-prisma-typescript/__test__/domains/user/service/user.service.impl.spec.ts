@@ -1,6 +1,6 @@
 import { UserService, UserServiceImpl } from '@domains/user/service';
 import { UserRepositoryImpl } from '@domains/user/repository';
-import { db } from '@utils';
+import { db, NotFoundException } from '@utils';
 import { httpServer } from '@server';
 import { UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '@domains/user/dto';
 import { Visibility } from '@prisma/client';
@@ -37,7 +37,108 @@ describe('UserServiceImpl', () => {
       expect(result).toEqual(userMockData);
     });
   });
-  describe('getUserRecomendations', () => {});
+
+  describe('getUserRecomendations', () => {
+    it('should return a list of UserViewDTO with 0 Pagination options', async () => {
+      const usersMockData: UserViewDTO[] = [
+        {
+          id: '321',
+          name: '',
+          username: 'username1',
+          profilePicture: null,
+        },
+        {
+          id: '123',
+          name: '',
+          username: 'username2',
+          profilePicture: 'profilePicture2.png',
+        },
+        {
+          id: '23',
+          name: '',
+          username: 'username3',
+          profilePicture: 'profilePicture3.png',
+        },
+      ];
+      const expectedResults: UserViewDTO[] = [
+        {
+          id: '321',
+          name: '',
+          username: 'username1',
+          profilePicture: null,
+        },
+        {
+          id: '123',
+          name: '',
+          username: 'username2',
+          profilePicture: 'profilePicture2.png',
+        },
+        {
+          id: '23',
+          name: '',
+          username: 'username3',
+          profilePicture: 'profilePicture3.png',
+        },
+      ];
+
+      userRepositoryMock.getRecommendedUsersPaginated.mockResolvedValue(usersMockData);
+
+      const results = await userService.getUserRecommendations('userId', {});
+
+      expect(userRepositoryMock.getRecommendedUsersPaginated).toHaveBeenCalledWith('userId', {});
+      expect(results).toEqual(expectedResults);
+    });
+
+    it('should return a list of UserViewDTO with limit Pagination options', async () => {
+      const usersMockData: UserViewDTO[] = [
+        {
+          id: '321',
+          name: '',
+          username: 'username1',
+          profilePicture: null,
+        },
+        {
+          id: '123',
+          name: '',
+          username: 'username2',
+          profilePicture: 'profilePicture2.png',
+        },
+      ];
+      const expectedResults: UserViewDTO[] = [
+        {
+          id: '321',
+          name: '',
+          username: 'username1',
+          profilePicture: null,
+        },
+        {
+          id: '123',
+          name: '',
+          username: 'username2',
+          profilePicture: 'profilePicture2.png',
+        },
+      ];
+
+      userRepositoryMock.getRecommendedUsersPaginated.mockResolvedValue(usersMockData);
+
+      const results = await userService.getUserRecommendations('userId', { limit: 2 });
+
+      expect(userRepositoryMock.getRecommendedUsersPaginated).toHaveBeenCalledWith('userId', { limit: 2 });
+      expect(results).toEqual(expectedResults);
+    });
+
+    it('should throw NotFoundException', async () => {
+      const usersMockData: UserViewDTO[] = [];
+
+      userRepositoryMock.getRecommendedUsersPaginated.mockResolvedValue(usersMockData);
+
+      // const results = await userService.getUserRecommendations('userId', {});
+      await expect(userService.getUserRecommendations('userId', {})).rejects.toThrow(NotFoundException);
+      expect(userRepositoryMock.getRecommendedUsersPaginated).toHaveBeenCalledWith('userId', {});
+      // expect(results).toEqual(expectedResults)
+    });
+  });
+
   describe('deleteUser', () => {
     it('should delete a user', async () => {
       const userMockData: UserDTO = {
@@ -53,6 +154,7 @@ describe('UserServiceImpl', () => {
       const result = await userService.deleteUser('1');
 
       expect(result).toEqual(userMockData);
+      expect(userRepositoryMock.delete).toHaveBeenCalled();
     });
 
     it('should throw a RecordNotFound Exception due to incorrect userId', async () => {
@@ -211,5 +313,42 @@ describe('UserServiceImpl', () => {
       expect(result).toEqual(updatedUserMockData);
     });
   });
-  describe('getUserContainsUsername', () => {});
+
+  describe('getUserContainsUsername', () => {
+    it('should return all users whose username contains said name', async () => {
+      const usersMockData: UserViewDTO[] = [
+        {
+          id: '1',
+          name: '',
+          username: 'username1',
+          profilePicture: null,
+        },
+        {
+          id: '2',
+          name: '',
+          username: 'username2',
+          profilePicture: 'profilePicture2.png',
+        },
+        {
+          id: '3',
+          name: '',
+          username: 'username3',
+          profilePicture: 'profilePicture3.png',
+        },
+      ];
+      userRepositoryMock.getUsersContainsUsername.mockResolvedValue(usersMockData);
+
+      const result = await userService.getUsersContainsUsername('name');
+      expect(userRepositoryMock.getUsersContainsUsername).toHaveBeenCalledWith('name');
+      expect(result).toEqual(usersMockData);
+    });
+
+    it('should throw NotFoundException as 0 usernames contain said name', async () => {
+      const usersMockData: UserViewDTO[] = [];
+      userRepositoryMock.getUsersContainsUsername.mockResolvedValue(usersMockData);
+
+      await expect(userService.getUsersContainsUsername('name')).rejects.toThrow(NotFoundException);
+      expect(userRepositoryMock.getUsersContainsUsername).toHaveBeenCalledWith('name');
+    });
+  });
 });

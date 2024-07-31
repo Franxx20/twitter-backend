@@ -1,9 +1,10 @@
 import { SignupInputDTO } from '@domains/auth/dto';
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Visibility } from '@prisma/client';
 import { OffsetPagination } from '@types';
 import { ExtendedUserDTO, UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 import { UserRepository } from './user.repository';
+import { db } from '@utils';
 
 export class UserRepositoryImpl implements UserRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -65,6 +66,7 @@ export class UserRepositoryImpl implements UserRepository {
     const publicUsersIDs: string[] = publicUsers.map((publicUsersID) => publicUsersID.id);
 
     const recommendedUsersIDs: string[] = [...followedIDs, ...publicUsersIDs];
+    if (!recommendedUsersIDs.length) return [];
 
     const users = await this.db.user.findMany({
       where: {
@@ -131,25 +133,58 @@ export class UserRepositoryImpl implements UserRepository {
     return data.map((user) => new UserViewDTO(user));
   }
 
-  async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {
-    const otherUser = await this.db.user.findUnique({
+  // async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {
+  //   const otherUser = await this.db.user.findUnique({
+  //     where: {
+  //       id: otherUserId,
+  //     },
+  //   });
+  //
+  //   if (otherUser === null) {
+  //     console.log(`otherUserId ${otherUserId} not found`);
+  //     return false;
+  //   }
+  //
+  //   const follow = await this.db.follow.findFirst({
+  //     where: {
+  //       followerId: userId,
+  //       followedId: otherUserId,
+  //     },
+  //   });
+  //
+  //   return follow !== null;
+  // }
+  async isUserPublicOrFollowed(followerID: string, followedID: string): Promise<boolean> {
+    const author = await db.user.findUnique({
       where: {
-        id: otherUserId,
+        id: followedID,
       },
     });
 
-    if (otherUser === null) {
-      console.log(`otherUserId ${otherUserId} not found`);
-      return false;
-    }
+    if (!author) return false;
 
-    const follow = await this.db.follow.findFirst({
+    if (author.visibility === Visibility.PUBLIC) return true;
+
+    if (author.visibility === Visibility.HIDDEN) return false;
+
+    const follow = await db.follow.findFirst({
       where: {
-        followerId: userId,
-        followedId: otherUserId,
+        followerId: followerID,
+        followedId: followedID,
       },
     });
 
     return follow !== null;
   }
+
+  async isUserFollowed(followerID: string, followedID: string): Promise<boolean> {
+    const follow = await db.follow.findFirst({
+      where: {
+        followerId: followerID,
+        followedId: followedID,
+      },
+    });
+    return follow !== null;
+  }
+  
 }
