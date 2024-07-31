@@ -14,7 +14,7 @@ describe('UserServiceImpl', () => {
   beforeEach(() => {
     userRepositoryMock = new UserRepositoryImpl(db) as jest.Mocked<UserRepositoryImpl>;
     userService = new UserServiceImpl(userRepositoryMock);
-    jest.restoreAllMocks()
+    jest.restoreAllMocks();
   });
 
   afterAll((done) => {
@@ -121,7 +121,7 @@ describe('UserServiceImpl', () => {
       const updatedUserMockData: UserUpdateOutputDTO = {
         id: '1',
         name: 'newName',
-        profilePicture: 'profilePicture.png',
+        profilePicture: 'NewProfilePicture.png',
         visibility: Visibility.PUBLIC,
         passwordIsUpdated: true,
       };
@@ -129,9 +129,9 @@ describe('UserServiceImpl', () => {
       userRepositoryMock.getById.mockResolvedValue(userMockData);
       userRepositoryMock.updateUser.mockResolvedValue(updatedUserMockData);
 
-      const userData: UserUpdateInputDTO = { profilePicture: 'newProfilePicture.png' };
+      const userData: UserUpdateInputDTO = { profilePicture: 'NewProfilePicture.png' };
       const result = await userService.updateUser('1', userData);
-      expect(result?.profilePicture).toEqual('newProfilePicture.png');
+      expect(result?.profilePicture).toEqual('NewProfilePicture.png');
     });
 
     it('should update user visibility', async () => {
@@ -146,16 +146,69 @@ describe('UserServiceImpl', () => {
         id: '1',
         name: '',
         profilePicture: 'profilePicture.png',
-        visibility: Visibility.PUBLIC,
+        visibility: Visibility.PRIVATE,
         passwordIsUpdated: true,
       };
 
       userRepositoryMock.getById.mockResolvedValue(userMockData);
       userRepositoryMock.updateUser.mockResolvedValue(updatedUserMockData);
 
-      const userData: UserUpdateInputDTO = { visibility:Visibility.PRIVATE};
+      const userData: UserUpdateInputDTO = { visibility: Visibility.PRIVATE };
       const result = await userService.updateUser('1', userData);
       expect(result?.visibility).toEqual(Visibility.PRIVATE);
+    });
+
+    it('should update user profilePicture, password, visibility, name', async () => {
+      const userMockData: UserViewDTO = {
+        id: '1',
+        name: '',
+        username: 'username',
+        profilePicture: 'profilePicture.png',
+      };
+
+      const updatedUserMockData: UserUpdateOutputDTO = {
+        id: '1',
+        name: 'newName',
+        passwordIsUpdated: true,
+        visibility: Visibility.PRIVATE,
+        profilePicture: 'NewProfilePicture.png',
+      };
+
+      userRepositoryMock.getById.mockResolvedValue(userMockData);
+      userRepositoryMock.updateUser.mockResolvedValue(updatedUserMockData);
+
+      const userData: UserUpdateInputDTO = {
+        name: 'newName',
+        password: 'NewPassword',
+        visibility: Visibility.PRIVATE,
+        profilePicture: 'NewProfilePicture.png',
+      };
+      const result = await userService.updateUser('1', userData);
+      expect(result).toEqual(updatedUserMockData);
+    });
+
+    it('should not update any kind of data', async () => {
+      const userMockData: UserViewDTO = {
+        id: '1',
+        name: '',
+        username: 'username',
+        profilePicture: 'profilePicture.png',
+      };
+
+      const updatedUserMockData: UserUpdateOutputDTO = {
+        id: '1',
+        name: '',
+        passwordIsUpdated: false,
+        visibility: Visibility.PUBLIC,
+        profilePicture: 'profilePicture.png',
+      };
+
+      userRepositoryMock.getById.mockResolvedValue(userMockData);
+      userRepositoryMock.updateUser.mockResolvedValue(updatedUserMockData);
+
+      const userData: UserUpdateInputDTO = {};
+      const result = await userService.updateUser('1', userData);
+      expect(result).toEqual(updatedUserMockData);
     });
   });
   describe('getUserContainsUsername', () => {});
