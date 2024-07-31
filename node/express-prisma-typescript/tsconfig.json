@@ -32,7 +32,7 @@
   "include": [
     "src/**/*",
     "jest.config.ts",
-    "__test__"
+    "__test__/**/*"
   ],
   "exclude": [
     "node_modules"
