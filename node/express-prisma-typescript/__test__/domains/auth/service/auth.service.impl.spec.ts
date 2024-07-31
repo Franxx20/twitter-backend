@@ -12,8 +12,8 @@ import {
 import { LoginInputDTO, SignupInputDTO, TokenDTO } from '@domains/auth/dto';
 import { AuthService, AuthServiceImpl } from '@domains/auth/service';
 import { Visibility } from '@prisma/client';
-import { httpServer } from '@server';
 import { ExtendedUserDTO } from '@domains/user/dto';
+import { socketIoServer } from '@server';
 
 jest.mock('src/domains/user/repository/user.repository.impl');
 jest.mock('class-validator');
@@ -29,7 +29,8 @@ describe('Auth Service Impl', () => {
   });
 
   afterAll((done) => {
-    httpServer.close();
+    socketIoServer.closeServerConnection();
+
     done();
   });
 
@@ -255,6 +256,5 @@ describe('Auth Service Impl', () => {
       const result = await authService.login(loginInputDTO);
       expect(result).toEqual({ token: 'token' });
     });
-
   });
 });

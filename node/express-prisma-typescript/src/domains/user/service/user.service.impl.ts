@@ -3,9 +3,7 @@ import { OffsetPagination } from 'types';
 import { UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 import { UserRepository } from '../repository';
 import { UserService } from './user.service';
-import bcrypt from 'bcrypt';
-import { Constants, db, generatePreSignedUrl } from '@utils';
-import * as console from 'node:console';
+import {  db, encryptPassword, generatePreSignedUrl } from '@utils';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly repository: UserRepository) {}
@@ -32,7 +30,7 @@ export class UserServiceImpl implements UserService {
 
     console.log(userUpdateData);
     if (userUpdateData.password) {
-      userUpdateData.password = await bcrypt.hash(userUpdateData.password, Constants.SALT_OR_ROUNDS);
+      userUpdateData.password = await encryptPassword(userUpdateData.password)
     }
     if (userUpdateData.profilePicture) {
       const preSignedUrl = await generatePreSignedUrl(userUpdateData.profilePicture);

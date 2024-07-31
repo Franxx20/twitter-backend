@@ -24,18 +24,10 @@ import { UserRepository } from '@domains/user/repository';
 export class PostServiceImpl implements PostService {
   constructor(private readonly repository: PostRepository, private readonly userValidationRepository: UserRepository) {}
 
-  async createPost(userId: string, content: string, images: string[]): Promise<PostDTO> {
+  async createPost(userId: string, content: string, images?: string[]): Promise<PostDTO> {
     const data = new CreatePostDTO(userId, content, images);
-    const errors = await validate(data, {
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    });
 
-    if (errors.length > 0) {
-      throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
-    }
-
-    if (data.images !== undefined) {
+    if (data.images?.length) {
       const urls: PreSignedUrl[] = await generatePreSignedUrls(data.images);
       console.log(urls);
       data.images = urls.map((url) => url.key);
@@ -54,7 +46,7 @@ export class PostServiceImpl implements PostService {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
     const post = await this.repository.getById(postId);
-    // solo se puede borrar un post si el userId es del autor
+    // only the post owner can delete its own post
     if (!post) throw new NotFoundException('post');
     if (post.authorId !== userId) throw new ForbiddenException();
     await this.repository.delete(postId);

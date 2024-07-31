@@ -98,27 +98,4 @@ export class PostRepositoryImpl implements PostRepository {
     });
     return posts.map((post) => new ExtendedPostDTO(post));
   }
-
-  async isPostAuthorPublicOrFollowed(userId: string, authorId: string): Promise<boolean> {
-    const author = await this.db.user.findUnique({
-      where: {
-        id: authorId,
-      },
-    });
-
-    if (!author) return false;
-
-    if (author.visibility === Visibility.PUBLIC) return true;
-
-    if (author.visibility === Visibility.HIDDEN) return false;
-
-    const follow = await this.db.follow.findFirst({
-      where: {
-        followerId: userId,
-        followedId: authorId,
-      },
-    });
-
-    return follow !== null;
-  }
 }

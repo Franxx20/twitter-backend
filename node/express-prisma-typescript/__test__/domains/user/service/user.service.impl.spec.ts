@@ -1,11 +1,17 @@
 import { UserService, UserServiceImpl } from '@domains/user/service';
 import { UserRepositoryImpl } from '@domains/user/repository';
-import { db, NotFoundException } from '@utils';
-import { httpServer } from '@server';
+import { db, encryptPassword, generatePreSignedUrl, NotFoundException } from '@utils';
 import { UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '@domains/user/dto';
 import { Visibility } from '@prisma/client';
+import {socketIoServer} from '@server';
+
 
 jest.mock('src/domains/user/repository/user.repository.impl');
+jest.mock('src/utils/myaws');
+jest.mock('src/utils/auth');
+
+const mockEncryptPassword = encryptPassword as jest.MockedFunction<typeof encryptPassword>;
+const mockGeneratePreSignedUrl = generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>;
 
 describe('UserServiceImpl', () => {
   let userService: UserService;
@@ -14,11 +20,12 @@ describe('UserServiceImpl', () => {
   beforeEach(() => {
     userRepositoryMock = new UserRepositoryImpl(db) as jest.Mocked<UserRepositoryImpl>;
     userService = new UserServiceImpl(userRepositoryMock);
-    jest.restoreAllMocks();
+    jest.resetAllMocks();
   });
 
   afterAll((done) => {
-    httpServer.close();
+    // httpServer.close();
+    socketIoServer.closeServerConnection()
     done();
   });
 
@@ -206,6 +213,8 @@ describe('UserServiceImpl', () => {
 
       userRepositoryMock.getById.mockResolvedValue(userMockData);
       userRepositoryMock.updateUser.mockResolvedValue(updatedUserMockData);
+      // (encryptPassword as jest.Mock).mockResolvedValue('hashedNewPassword')
+      mockEncryptPassword.mockResolvedValue('hashedNewPassword')
 
       const userData: UserUpdateInputDTO = { password: 'newPassword' };
       const result = await userService.updateUser('1', userData);
@@ -223,17 +232,18 @@ describe('UserServiceImpl', () => {
       const updatedUserMockData: UserUpdateOutputDTO = {
         id: '1',
         name: 'newName',
-        profilePicture: 'NewProfilePicture.png',
+        profilePicture: 'key',
         visibility: Visibility.PUBLIC,
         passwordIsUpdated: true,
       };
 
       userRepositoryMock.getById.mockResolvedValue(userMockData);
       userRepositoryMock.updateUser.mockResolvedValue(updatedUserMockData);
+      mockGeneratePreSignedUrl.mockResolvedValue({signedUrl:'preSignedUrl', key:'key'})
 
       const userData: UserUpdateInputDTO = { profilePicture: 'NewProfilePicture.png' };
       const result = await userService.updateUser('1', userData);
-      expect(result?.profilePicture).toEqual('NewProfilePicture.png');
+      expect(result?.profilePicture).toEqual('key');
     });
 
     it('should update user visibility', async () => {
@@ -261,6 +271,8 @@ describe('UserServiceImpl', () => {
     });
 
     it('should update user profilePicture, password, visibility, name', async () => {
+      mockEncryptPassword.mockResolvedValue('hashedNewPassword')
+      mockGeneratePreSignedUrl.mockResolvedValue({signedUrl:'preSignedUrl', key:'key'})
       const userMockData: UserViewDTO = {
         id: '1',
         name: '',
@@ -273,11 +285,12 @@ describe('UserServiceImpl', () => {
         name: 'newName',
         passwordIsUpdated: true,
         visibility: Visibility.PRIVATE,
-        profilePicture: 'NewProfilePicture.png',
+        profilePicture: 'key',
       };
 
       userRepositoryMock.getById.mockResolvedValue(userMockData);
       userRepositoryMock.updateUser.mockResolvedValue(updatedUserMockData);
+
 
       const userData: UserUpdateInputDTO = {
         name: 'newName',

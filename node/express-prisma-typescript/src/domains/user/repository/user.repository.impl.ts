@@ -133,27 +133,6 @@ export class UserRepositoryImpl implements UserRepository {
     return data.map((user) => new UserViewDTO(user));
   }
 
-  // async isUserFollowed(userId: string, otherUserId: string): Promise<boolean> {
-  //   const otherUser = await this.db.user.findUnique({
-  //     where: {
-  //       id: otherUserId,
-  //     },
-  //   });
-  //
-  //   if (otherUser === null) {
-  //     console.log(`otherUserId ${otherUserId} not found`);
-  //     return false;
-  //   }
-  //
-  //   const follow = await this.db.follow.findFirst({
-  //     where: {
-  //       followerId: userId,
-  //       followedId: otherUserId,
-  //     },
-  //   });
-  //
-  //   return follow !== null;
-  // }
   async isUserPublicOrFollowed(followerID: string, followedID: string): Promise<boolean> {
     const author = await db.user.findUnique({
       where: {
@@ -177,13 +156,24 @@ export class UserRepositoryImpl implements UserRepository {
     return follow !== null;
   }
 
-  async isUserFollowed(followerID: string, followedID: string): Promise<boolean> {
-    const follow = await db.follow.findFirst({
+  async isUserFollowed(followerId: string, followedId: string): Promise<boolean> {
+    const otherUser = await this.db.user.findUnique({
       where: {
-        followerId: followerID,
-        followedId: followedID,
+        id: followedId,
       },
     });
+
+    if (otherUser === null) {
+      return false;
+    }
+
+    const follow = await this.db.follow.findFirst({
+      where: {
+        followerId,
+        followedId,
+      },
+    });
+
     return follow !== null;
   }
 }

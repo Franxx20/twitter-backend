@@ -2,7 +2,7 @@ import { ArrayMaxSize, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } fro
 import { ExtendedUserDTO } from '@domains/user/dto';
 
 export class CreatePostDTO {
-  constructor(userId: string, content: string, images: string[]) {
+  constructor(userId: string, content: string, images?: string[]) {
     this.userId = userId;
     this.content = content;
     this.images = images;

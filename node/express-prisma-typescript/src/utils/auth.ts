@@ -26,7 +26,7 @@ export const withAuth = (req: Request, res: Response, next: () => any): void => 
 };
 
 export const encryptPassword = async (password: string): Promise<string> => {
-  return await bcrypt.hash(password, 10);
+  return await bcrypt.hash(password, Constants.SALT_OR_ROUNDS);
 };
 
 export const checkPassword = async (password: string, hash: string): Promise<boolean> => {

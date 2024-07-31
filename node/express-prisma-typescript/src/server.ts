@@ -43,7 +43,7 @@ export const httpServer: http.Server<typeof IncomingMessage, typeof ServerRespon
     `);
 });
 
-const socketIoServer: SocketIoServer = new SocketIoServer(
+export const socketIoServer: SocketIoServer = new SocketIoServer(
   httpServer,
   new MessageRepositoryImpl(db),
   new UserRepositoryImpl(db)
