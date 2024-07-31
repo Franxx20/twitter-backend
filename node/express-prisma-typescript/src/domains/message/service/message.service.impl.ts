@@ -1,18 +1,17 @@
 import { MessageService } from '@domains/message/service/message.service';
+
 import { DeleteMessageDTO, GetChatMessagesDTO, GetMessageById, MessageDTO } from '@domains/message/dto';
 import { CursorPagination } from '@types';
 import { validate } from 'class-validator';
 import { MessageRepository } from '@domains/message/repository';
-import {
-  ForbiddenException,
-  InvalidUserException,
-  isUserFollowed,
-  NotFoundException,
-  ValidationException,
-} from '@utils';
+import { ForbiddenException, InvalidUserException, NotFoundException, ValidationException } from '@utils';
+import { UserRepository } from '@domains/user/repository';
 
 export class MessageServiceImpl implements MessageService {
-  constructor(private readonly repository: MessageRepository) {}
+  constructor(
+    private readonly repository: MessageRepository,
+    private readonly userValidationRepository: UserRepository
+  ) {}
 
   async create(message: MessageDTO): Promise<MessageDTO> {
     const errors = await validate(message, {
@@ -61,7 +60,7 @@ export class MessageServiceImpl implements MessageService {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
 
-    const result = await isUserFollowed(data.senderId, data.receiverId);
+    const result = await this.userValidationRepository.isUserFollowed(data.senderId, data.receiverId);
 
     if (!result) throw new InvalidUserException();
 

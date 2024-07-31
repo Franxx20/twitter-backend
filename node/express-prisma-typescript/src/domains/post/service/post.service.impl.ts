@@ -15,14 +15,14 @@ import {
   ForbiddenException,
   generatePreSignedUrls,
   InvalidUserException,
-  isUserPublicOrFollowed,
   NotFoundException,
   ValidationException,
 } from '@utils';
 import { CursorPagination } from '@types';
+import { UserRepository } from '@domains/user/repository';
 
 export class PostServiceImpl implements PostService {
-  constructor(private readonly repository: PostRepository) {}
+  constructor(private readonly repository: PostRepository, private readonly userValidationRepository: UserRepository) {}
 
   async createPost(userId: string, content: string, images: string[]): Promise<PostDTO> {
     const data = new CreatePostDTO(userId, content, images);
@@ -73,7 +73,7 @@ export class PostServiceImpl implements PostService {
     const post = await this.repository.getById(postId);
 
     if (!post) throw new NotFoundException('post');
-    const result = await isUserPublicOrFollowed(userId, post.authorId);
+    const result = await this.userValidationRepository.isUserPublicOrFollowed(userId, post.authorId);
     if (!result) {
       throw new InvalidUserException();
     }
@@ -99,7 +99,7 @@ export class PostServiceImpl implements PostService {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
 
-    const result = await isUserPublicOrFollowed(data.userId, data.authorId);
+    const result = await this.userValidationRepository.isUserPublicOrFollowed(data.userId, data.authorId);
     if (!result) {
       throw new InvalidUserException();
     }

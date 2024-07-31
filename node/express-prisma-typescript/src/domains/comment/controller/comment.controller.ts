@@ -7,11 +7,12 @@ import { BodyValidation, db } from '@utils';
 import { CommentRepositoryImpl } from '../repository';
 import { CommentService, CommentServiceImpl } from '../service';
 import { CreatePostDTO } from '@domains/post/dto';
+import { UserRepositoryImpl } from '@domains/user/repository';
 
 export const commentRouter = Router();
 
 // User dependency injection
-const service: CommentService = new CommentServiceImpl(new CommentRepositoryImpl(db));
+const service: CommentService = new CommentServiceImpl(new CommentRepositoryImpl(db), new UserRepositoryImpl(db));
 
 commentRouter.get('/:commentId', async (req: Request, res: Response, next: NextFunction) => {
   const { userId } = res.locals.context;

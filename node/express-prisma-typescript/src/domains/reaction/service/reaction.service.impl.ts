@@ -8,11 +8,15 @@ import {
 } from '@domains/reaction/dto';
 import { ReactionRepository } from '@domains/reaction/repository';
 import { ReactionService } from '@domains/reaction/service/reaction.service';
-import { ForbiddenException, isUserPublicOrFollowed, NotFoundException, ValidationException } from '@utils';
+import { ForbiddenException, NotFoundException, ValidationException } from '@utils';
 import { validate } from 'class-validator';
+import { UserRepository } from '@domains/user/repository';
 
 export class ReactionServiceImpl implements ReactionService {
-  constructor(private readonly repository: ReactionRepository) {}
+  constructor(
+    private readonly repository: ReactionRepository,
+    private readonly userValidationRepository: UserRepository
+  ) {}
 
   async createReaction(data: CreateReactionDTO): Promise<ReactionDTO> {
     const errors = await validate(data, {
@@ -70,7 +74,7 @@ export class ReactionServiceImpl implements ReactionService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
-    const result = await isUserPublicOrFollowed(data.userId, data.authorId);
+    const result = await this.userValidationRepository.isUserPublicOrFollowed(data.userId, data.authorId);
     if (!result) throw new ForbiddenException();
 
     const reactions = await this.repository.getAllReactionsFromUser(data.authorId);
@@ -109,7 +113,7 @@ export class ReactionServiceImpl implements ReactionService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
-    const result = await isUserPublicOrFollowed(data.userId, data.authorId);
+    const result = await this.userValidationRepository.isUserPublicOrFollowed(data.userId, data.authorId);
     if (!result) throw new ForbiddenException();
 
     const reactions = await this.repository.getAllLikesFromUser(data.authorId);
@@ -128,7 +132,7 @@ export class ReactionServiceImpl implements ReactionService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
-    const result = await isUserPublicOrFollowed(data.userId, data.authorId);
+    const result = await this.userValidationRepository.isUserPublicOrFollowed(data.userId, data.authorId);
     if (!result) throw new ForbiddenException();
 
     const reactions = await this.repository.getAllRetweetsFromUser(data.authorId);

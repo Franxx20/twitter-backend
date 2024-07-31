@@ -8,7 +8,6 @@ import { BodyValidation, db, generatePreSignedUrl } from '@utils';
 import { UserRepositoryImpl } from '../repository';
 import { UserService, UserServiceImpl } from '../service';
 import { UserUpdateInputDTO } from '@domains/user/dto';
-import { isUserFollowed } from '@utils/userValidation';
 
 export const userRouter = Router();
 
@@ -54,7 +53,7 @@ userRouter.get('/:userId', async (req: Request, res: Response, next: NextFunctio
   const { userId } = res.locals.context;
 
   try {
-    const result = await isUserFollowed(userId, otherUserId);
+    const result = await service.isUserFollowed(userId, otherUserId);
     const user = await service.getUser(otherUserId);
 
     return res.status(HttpStatus.OK).json({

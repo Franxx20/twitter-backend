@@ -11,17 +11,15 @@ import {
   GetCommentsFromUserDTO,
   GetParentPostDTO,
 } from '@domains/comment/dto';
-import {
-  ForbiddenException,
-  InvalidUserException,
-  isUserPublicOrFollowed,
-  NotFoundException,
-  ValidationException,
-} from '@utils';
+import { ForbiddenException, InvalidUserException, NotFoundException, ValidationException } from '@utils';
 import { OffsetPagination } from '@types';
+import { UserRepository } from '@domains/user/repository';
 
 export class CommentServiceImpl implements CommentService {
-  constructor(private readonly repository: CommentRepository) {}
+  constructor(
+    private readonly repository: CommentRepository,
+    private readonly userValidationRepository: UserRepository
+  ) {}
 
   async createComment(userId: string, parentPostId: string, data: CreatePostDTO): Promise<CommentDTO> {
     const errors = await validate(data, {
@@ -67,7 +65,7 @@ export class CommentServiceImpl implements CommentService {
     const comment = await this.repository.getById(postId);
     if (!comment) throw new NotFoundException('comment');
 
-    const result = await isUserPublicOrFollowed(userId, comment.authorId);
+    const result = await this.userValidationRepository.isUserPublicOrFollowed(userId, comment.authorId);
     console.log(result);
     if (!result) throw new InvalidUserException();
 
@@ -84,7 +82,7 @@ export class CommentServiceImpl implements CommentService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
-    const result = await isUserPublicOrFollowed(userId, authorId);
+    const result = await this.userValidationRepository.isUserPublicOrFollowed(userId, authorId);
     if (!result) throw new InvalidUserException();
 
     const comments = await this.repository.getAllCommentsFromUser(authorId);
@@ -110,7 +108,7 @@ export class CommentServiceImpl implements CommentService {
     const post = await this.repository.getById(postId);
     if (!post) throw new NotFoundException('post');
 
-    const result = await isUserPublicOrFollowed(userId, post.authorId);
+    const result = await this.userValidationRepository.isUserPublicOrFollowed(userId, post.authorId);
     if (!result) throw new InvalidUserException();
 
     const comments = await this.repository.getAllCommentsFromPost(postId, options);

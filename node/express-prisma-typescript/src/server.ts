@@ -3,12 +3,14 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
-import { Constants, Logger, NodeEnv } from '@utils';
+import { Constants, db, Logger, NodeEnv } from '@utils';
 import { router } from '@router';
 import { ErrorHandling } from '@utils/errors';
-import { initSocketServer } from '@utils/socketIoServer';
 import * as http from 'node:http';
 import { IncomingMessage, ServerResponse } from 'node:http';
+import { UserRepositoryImpl } from '@domains/user/repository';
+import { MessageRepositoryImpl } from '@domains/message/repository';
+import { SocketIoServer } from '@utils/socketIoServer';
 
 export const app = express();
 
@@ -41,4 +43,9 @@ export const httpServer: http.Server<typeof IncomingMessage, typeof ServerRespon
     `);
 });
 
-initSocketServer(httpServer);
+const socketIoServer: SocketIoServer = new SocketIoServer(
+  httpServer,
+  new MessageRepositoryImpl(db),
+  new UserRepositoryImpl(db)
+);
+socketIoServer.initSocketServer();

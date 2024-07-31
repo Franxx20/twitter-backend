@@ -8,11 +8,12 @@ import { BodyValidation, db } from '@utils';
 import { ReactionRepositoryImpl } from '../repository';
 import { ReactionService, ReactionServiceImpl } from '@domains/reaction/service';
 import { CreateReactionDTO, DeleteReactionDTO, ReactionActionDTO } from '@domains/reaction/dto';
+import { UserRepositoryImpl } from '@domains/user/repository';
 
 export const reactionRouter = Router();
 
 // Use dependency injection
-const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryImpl(db));
+const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryImpl(db), new UserRepositoryImpl(db));
 
 // Add the ability to react to a post (like and retweet)
 // both should be stored in the same table and

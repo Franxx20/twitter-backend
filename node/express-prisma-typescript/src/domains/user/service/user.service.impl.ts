@@ -5,7 +5,7 @@ import { UserRepository } from '../repository';
 import { UserService } from './user.service';
 import bcrypt from 'bcrypt';
 import { Constants, db, generatePreSignedUrl } from '@utils';
-import { Visibility } from '@prisma/client';
+import * as console from 'node:console';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly repository: UserRepository) {}
@@ -47,5 +47,13 @@ export class UserServiceImpl implements UserService {
     return users;
   }
 
-
+  async isUserFollowed(followerID: string, followedID: string): Promise<boolean> {
+    const follow = await db.follow.findFirst({
+      where: {
+        followerId: followerID,
+        followedId: followedID,
+      },
+    });
+    return follow !== null;
+  }
 }

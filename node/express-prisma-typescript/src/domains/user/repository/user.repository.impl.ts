@@ -186,5 +186,5 @@ export class UserRepositoryImpl implements UserRepository {
     });
     return follow !== null;
   }
-  
+
 }
