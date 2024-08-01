@@ -15,17 +15,26 @@ export enum LogLevel {
 // Environment variables, casting to correct type and setting default values for them.
 export class Constants {
   // Node runtime environment
-  static NODE_ENV: NodeEnv = (process.env.NODE_ENV as NodeEnv) || NodeEnv.DEV
+  static NODE_ENV: NodeEnv = (process.env.NODE_ENV as NodeEnv) || NodeEnv.DEV;
 
   // Logging level
-  static LOG_LEVEL: LogLevel = (process.env.LOG_LEVEL as LogLevel) || LogLevel.INFO
+  static LOG_LEVEL: LogLevel = (process.env.LOG_LEVEL as LogLevel) || LogLevel.INFO;
 
   // Port to run the server in
-  static PORT: string = process.env.PORT ?? '8080'
+  static PORT: string = process.env.PORT ?? '8080';
 
   // CORS urls to allow
-  static CORS_WHITELIST: string = process.env.CORS_WHITELIST ?? '*'
+  static CORS_WHITELIST: string = process.env.CORS_WHITELIST ?? '*';
 
   // Authentication secret
-  static TOKEN_SECRET: string = process.env.TOKEN_SECRET ?? 'secret'
+  static TOKEN_SECRET: string = process.env.TOKEN_SECRET ?? 'secret';
+
+  static SALT_OR_ROUNDS: number = Number(process.env.SALT_OR_ROUNDS) ?? 10;
+
+  static BUCKET_NAME: string = process.env.BUCKET_NAME ?? '';
+  static BUCKET_REGION: string = process.env.BUCKET_REGION ?? '';
+  static ACCESS_KEY: string = process.env.ACCESS_KEY ?? '';
+  static SECRET_ACCESS_KEY: string = process.env.SECRET_ACCESS_KEY ?? ':';
+
+  static PRE_SIGNED_URL_LIFETIME: number = 60 * 5;
 }

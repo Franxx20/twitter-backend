@@ -28,7 +28,7 @@ export class ForbiddenException extends HttpException {
 
 export class InvalidUserException extends HttpException {
   constructor() {
-    super(HttpStatus.FORBIDDEN, "You don't have permission to perform this action on user");
+    super(HttpStatus.NOT_FOUND, "You don't have permission to perform this action on user");
   }
 }
 
@@ -45,7 +45,8 @@ export class ConflictException extends HttpException {
 }
 
 export function ErrorHandling(error: Error, req: Request, res: Response, next: NextFunction): Response {
-  if (!error) next(error); // TODO How should I fix EsLint here?
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+  if (!error) next(); // TODO How should I fix EsLint here?
   if (error instanceof HttpException) {
     if (error.code === HttpStatus.INTERNAL_SERVER_ERROR) {
       Logger.error(error.message);

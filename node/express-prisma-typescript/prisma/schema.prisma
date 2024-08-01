@@ -22,6 +22,27 @@ enum Visibility {
   HIDDEN
 }
 
+enum ReactionAction {
+  LIKE
+  RETWEET
+}
+
+model Reaction {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+
+  authorId String @db.Uuid // Foreing Key
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to Many
+
+  postId String @db.Uuid // Foreing Key
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade) // One to Many
+
+  action ReactionAction
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Optional value
+}
+
 model User {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
 
@@ -32,6 +53,8 @@ model User {
 
   visibility Visibility @default(PUBLIC)
 
+  profilePicture String?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value
@@ -39,6 +62,26 @@ model User {
   posts     Post[]
   follows   Follow[] @relation(name: "follows")
   followers Follow[] @relation(name: "followers")
+
+  Reaction Reaction[]
+
+  sendedMessages   Message[] @relation(name: "sender")
+  receivedMessages Message[] @relation(name: "receiver")
+}
+
+model Message {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary key
+
+  senderId String @db.Uuid // Foreing Key
+  sender   User   @relation(name: "sender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String @db.Uuid // Foreing Key
+  receiver   User   @relation(name: "receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime? // Optional value
+
+  content String @db.VarChar(240)
 }
 
 model Post {
@@ -52,7 +95,13 @@ model Post {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value
 
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+  parentPost   Post?   @relation("PostToPost", fields: [parentPostId], references: [id])
+  parentPostId String? @db.Uuid
+
+  comments Post[] @relation("PostToPost")
+
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+  reactions Reaction[] // Changed to plural to denote relation
 }
 
 model Follow {

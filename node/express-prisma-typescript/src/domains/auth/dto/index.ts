@@ -1,4 +1,5 @@
-import { IsEmail,  IsNotEmpty, IsOptional, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from 'class-validator';
+
 // import {Visibility} from '@prisma/client';
 
 export class TokenDTO {
@@ -26,7 +27,6 @@ export class SignupInputDTO {
     this.username = username;
   }
 }
-
 
 export class LoginInputDTO {
   @IsOptional()

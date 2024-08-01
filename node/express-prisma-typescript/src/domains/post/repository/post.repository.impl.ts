@@ -1,27 +1,24 @@
-import { PrismaClient, Visibility } from '@prisma/client';
+import { PrismaClient, ReactionAction, Visibility } from '@prisma/client';
 
 import { CursorPagination } from '@types';
 
 import { PostRepository } from '.';
-import { CreatePostInputDTO, PostDTO } from '../dto';
+import { CreatePostDTO, ExtendedPostDTO, PostDTO } from '../dto';
 
 export class PostRepositoryImpl implements PostRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async create(userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
+  async create(postData: CreatePostDTO): Promise<PostDTO> {
     const post = await this.db.post.create({
       data: {
-        authorId: userId,
-        ...data,
+        authorId: postData.userId,
+        ...postData,
       },
     });
     return new PostDTO(post);
   }
 
-  // All users are currently public, meaning that i can see tweets from anyone, without having to follow them.
-  // Add the ability for users to have private profiles and store it in the User table.
-  // Update the GET api/post to return only posts with public account authors or private account authors that the user follows.
-  async getAllByDatePaginated(userId: string, options: CursorPagination): Promise<PostDTO[]> {
+  async getAllByDatePaginated(userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
     const userFollows = await this.db.follow.findMany({
       where: {
         followerId: userId,
@@ -32,12 +29,10 @@ export class PostRepositoryImpl implements PostRepository {
     });
 
     const followedIds = userFollows.map((follow) => follow.followedId);
-    // console.log(followedIds);
 
     const posts = await this.db.post.findMany({
       where: {
         OR: [
-          // { authorId: userId },
           {
             author: {
               visibility: Visibility.PUBLIC,
@@ -50,6 +45,12 @@ export class PostRepositoryImpl implements PostRepository {
             },
           },
         ],
+      },
+
+      include: {
+        author: true,
+        reactions: true,
+        comments: true,
       },
 
       cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
@@ -65,7 +66,13 @@ export class PostRepositoryImpl implements PostRepository {
       ],
     });
 
-    return posts.map((post) => new PostDTO(post));
+    return posts.map((post) => {
+      const qtyLikes = post.reactions.filter((reaction) => reaction.action === ReactionAction.LIKE).length;
+      const qtyRetweets = post.reactions.filter((reaction) => reaction.action === ReactionAction.RETWEET).length;
+      const qtyComments = post.comments.length;
+
+      return new ExtendedPostDTO({ ...post, qtyComments, qtyLikes, qtyRetweets });
+    });
   }
 
   async delete(postId: string): Promise<void> {
@@ -85,35 +92,24 @@ export class PostRepositoryImpl implements PostRepository {
     return post != null ? new PostDTO(post) : null;
   }
 
-  async getByAuthorId(authorId: string): Promise<PostDTO[]> {
+  async getByAuthorId(authorId: string): Promise<ExtendedPostDTO[]> {
     const posts = await this.db.post.findMany({
       where: {
         authorId,
       },
-    });
-    return posts.map((post) => new PostDTO(post));
-  }
-
-  async isPostAuthorPublicOrFollowed(userId: string, authorId: string): Promise<boolean> {
-    const author = await this.db.user.findUnique({
-      where: {
-        id: authorId,
+      include: {
+        author: true,
+        comments: true,
+        reactions: true,
       },
     });
 
-    if (!author) return false;
+    return posts.map((post) => {
+      const qtyLikes = post.reactions.filter((reaction) => reaction.action === ReactionAction.LIKE).length;
+      const qtyRetweets = post.reactions.filter((reaction) => reaction.action === ReactionAction.RETWEET).length;
+      const qtyComments = post.comments.length;
 
-    if (author.visibility === Visibility.PUBLIC) return true;
-
-    if (author.visibility === Visibility.HIDDEN) return false;
-
-    const follow = await this.db.follow.findFirst({
-      where: {
-        followerId: userId,
-        followedId: authorId,
-      },
+      return new ExtendedPostDTO({ ...post, qtyLikes, qtyRetweets, qtyComments });
     });
-
-    return follow !== null;
   }
 }
