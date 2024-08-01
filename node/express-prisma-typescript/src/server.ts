@@ -42,7 +42,6 @@ export const httpServer: http.Server<typeof IncomingMessage, typeof ServerRespon
       ################################################
     `);
 });
-// test
 
 export const socketIoServer: SocketIoServer = new SocketIoServer(
   httpServer,
