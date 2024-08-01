@@ -2,23 +2,11 @@ import { PrismaClient, ReactionAction } from '@prisma/client';
 
 import { ReactionRepository } from '.';
 import { CreateReactionDTO, ReactionDTO } from '../dto';
-import { ForbiddenException } from '@utils';
 
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor(private readonly db: PrismaClient) {}
 
   async create(authorId: string, data: CreateReactionDTO): Promise<ReactionDTO> {
-    const oldReaction = await this.db.reaction.findFirst({
-      where: {
-        postId: data.postId,
-        action: data.action,
-      },
-    });
-
-    if (oldReaction) {
-      throw new ForbiddenException();
-    }
-
     const reaction = await this.db.reaction.create({
       data: {
         authorId,
@@ -111,5 +99,35 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     });
     if (!authorId) return null;
     return authorId.authorId;
+  }
+
+  async reactionAlreadyExists(authorId: string, postId: string, reactionAction: ReactionAction): Promise<boolean> {
+    const oldReaction = await this.db.reaction.findFirst({
+      where: {
+        authorId,
+        postId,
+        action: reactionAction,
+      },
+    });
+
+    return !!oldReaction;
+  }
+
+  async userExists(userId: string): Promise<boolean> {
+    const user = await this.db.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    return !!user;
+  }
+
+  async postExists(postId: string): Promise<boolean> {
+    const post = await this.db.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+    return !!post;
   }
 }

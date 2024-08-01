@@ -12,5 +12,9 @@ export interface ReactionRepository {
   getAllLikesFromUser: (userId: string) => Promise<ReactionDTO[]>;
   getAllRetweetsFromUser: (userId: string) => Promise<ReactionDTO[]>;
 
+  reactionAlreadyExists: (authorId: string, postId: string, reactionAction: ReactionAction) => Promise<boolean>;
+  userExists:(authorId: string) => Promise<boolean>;
+  postExists:(postId:string)=>Promise<boolean>;
+
   getAuthorIdOfPost: (postId: string) => Promise<string | null>;
 }

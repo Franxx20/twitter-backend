@@ -8,7 +8,7 @@ import {
 } from '@domains/reaction/dto';
 import { ReactionRepository } from '@domains/reaction/repository';
 import { ReactionService } from '@domains/reaction/service/reaction.service';
-import { ForbiddenException, NotFoundException, ValidationException } from '@utils';
+import { ConflictException, ForbiddenException, NotFoundException, ValidationException } from '@utils';
 import { validate } from 'class-validator';
 import { UserRepository } from '@domains/user/repository';
 
@@ -27,6 +27,13 @@ export class ReactionServiceImpl implements ReactionService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
+    if (!(await this.repository.postExists(data.postId))) throw new NotFoundException('post not found');
+
+    if (!(await this.repository.userExists(data.userId))) throw new NotFoundException('user not found');
+
+    if (await this.repository.reactionAlreadyExists(data.userId, data.postId, data.action))
+      throw new ConflictException('reaction already Exists');
+
     return await this.repository.create(data.userId, data);
   }
 
@@ -39,6 +46,13 @@ export class ReactionServiceImpl implements ReactionService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
+
+    if (!(await this.repository.postExists(data.postId))) throw new NotFoundException('post not found');
+
+    if (!(await this.repository.userExists(data.userId))) throw new NotFoundException('user not found');
+
+    if (!await this.repository.reactionAlreadyExists(data.userId, data.postId, data.action))
+      throw new ConflictException('reaction does not Exists');
 
     await this.repository.delete(data.userId, data.postId, data.action);
   }
@@ -59,6 +73,7 @@ export class ReactionServiceImpl implements ReactionService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
+
     const reaction = await this.repository.getByReactionId(data.reactionId);
     if (!reaction) throw new NotFoundException('reaction');
     return reaction;
