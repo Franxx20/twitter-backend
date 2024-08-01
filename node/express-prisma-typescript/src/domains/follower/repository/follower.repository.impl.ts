@@ -44,4 +44,15 @@ export class FollowerRepositoryImpl implements FollowerRepository {
   async getAllFollows(): Promise<FollowerDTO[]> {
     return await this.db.follow.findMany({});
   }
+
+  async userExists(followedId: string): Promise<boolean> {
+    // return Promise.resolve(false);
+    const result = await this.db.user.findUnique({
+      where: {
+        id: followedId,
+      },
+    });
+
+    return !!result;
+  }
 }

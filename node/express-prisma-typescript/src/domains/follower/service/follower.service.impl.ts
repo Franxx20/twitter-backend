@@ -1,16 +1,15 @@
 import { FollowerService } from '@domains/follower/service/follower.service';
 import { CreateFollow, DeleteFollowDTO, FollowerDTO, GetFollowDTO } from '@domains/follower/dto';
 import { validate } from 'class-validator';
-import { ForbiddenException, NotFoundException, ValidationException } from '@utils';
+import { ConflictException, ForbiddenException, NotFoundException, ValidationException } from '@utils';
 import { FollowerRepository } from '@domains/follower/repository';
 
 export class FollowerServiceImpl implements FollowerService {
   constructor(private readonly repository: FollowerRepository) {}
 
-  /* TODO no se siga a si mismo.
-  // TODO no lo cree si ya existe
-  // TODO no cree si el seguido no existe
-  // TODO si ya le signo que no le deje volver a seguir
+  /* TODO no se siga a si mismo (DONE).
+  // TODO no lo cree si ya existe (DONE)
+  // TODO no cree si el seguido no existe (DONE)
   */
   async createFollower(followerId: string, followedId: string): Promise<FollowerDTO> {
     const data = new CreateFollow(followerId, followedId);
@@ -22,6 +21,14 @@ export class FollowerServiceImpl implements FollowerService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
+
+    const followedExist: boolean = await this.repository.userExists(followedId);
+    if (!followedExist) throw new NotFoundException('followed does not exists');
+
+    if (followerId === followedId) throw new ConflictException('cannot follow itself');
+    const oldFollow = await this.repository.getById(followerId, followedId);
+    if (oldFollow) throw new ConflictException('follow already exist');
+
     return await this.repository.create(data);
   }
 

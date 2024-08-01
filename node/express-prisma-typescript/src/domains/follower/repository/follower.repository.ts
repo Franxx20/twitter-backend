@@ -6,4 +6,5 @@ export interface FollowerRepository {
   getById: (followerId: string, followedId: string) => Promise<FollowerDTO | null>;
   getByFollowerId: (followerId: string) => Promise<FollowerDTO[]>;
   getAllFollows: () => Promise<FollowerDTO[]>;
+  userExists: (followedId: string) => Promise<boolean>;
 }
