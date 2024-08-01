@@ -2,7 +2,7 @@
 
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-export class CreateFollow {
+export class CreateFollowDTO {
   constructor(followerId: string, followedId: string) {
     this.followerId = followerId;
     this.followedId = followedId;

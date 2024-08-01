@@ -14,11 +14,12 @@ export const myS3: S3Client = new S3Client({
 });
 
 export async function generatePreSignedUrls(images: string[]): Promise<PreSignedUrl[]> {
-  return await Promise.all(
-    images.map(async (image) => {
-      return await generatePreSignedUrl(image);
-    })
-  );
+  const preSignedUrls: PreSignedUrl[] = [];
+  for (const image of images) {
+    const preSignedUrl = await generatePreSignedUrl(image);
+    preSignedUrls.push(preSignedUrl);
+  }
+  return preSignedUrls;
 }
 
 export async function generatePreSignedUrl(image: string): Promise<PreSignedUrl> {

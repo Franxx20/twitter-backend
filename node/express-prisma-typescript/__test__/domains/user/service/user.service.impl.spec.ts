@@ -7,7 +7,7 @@ import {socketIoServer} from '@server';
 
 
 jest.mock('src/domains/user/repository/user.repository.impl');
-jest.mock('src/utils/myaws');
+jest.mock('src/utils/s3Bucket');
 jest.mock('src/utils/auth');
 
 const mockEncryptPassword = encryptPassword as jest.MockedFunction<typeof encryptPassword>;
@@ -24,7 +24,6 @@ describe('UserServiceImpl', () => {
   });
 
   afterAll((done) => {
-    // httpServer.close();
     socketIoServer.closeServerConnection()
     done();
   });

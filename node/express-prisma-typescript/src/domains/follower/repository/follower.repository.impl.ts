@@ -1,11 +1,11 @@
-import { CreateFollow, FollowerDTO } from '@domains/follower/dto';
+import { CreateFollowDTO, FollowerDTO } from '@domains/follower/dto';
 import { FollowerRepository } from '@domains/follower/repository/follower.repository';
 import { PrismaClient } from '@prisma/client';
 
 export class FollowerRepositoryImpl implements FollowerRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async create(data: CreateFollow): Promise<FollowerDTO> {
+  async create(data: CreateFollowDTO): Promise<FollowerDTO> {
     const follow = await this.db.follow.create({
       data: {
         ...data,
@@ -45,11 +45,10 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     return await this.db.follow.findMany({});
   }
 
-  async userExists(followedId: string): Promise<boolean> {
-    // return Promise.resolve(false);
+  async userExists(userId: string): Promise<boolean> {
     const result = await this.db.user.findUnique({
       where: {
-        id: followedId,
+        id: userId,
       },
     });
 

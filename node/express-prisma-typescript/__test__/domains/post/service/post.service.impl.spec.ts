@@ -18,7 +18,7 @@ import { Visibility } from '@prisma/client';
 
 jest.mock('src/domains/post/repository/post.repository.impl');
 jest.mock('class-validator');
-jest.mock('src/utils/myaws');
+jest.mock('src/utils/s3Bucket');
 
 const mockGeneratePreSignedUrl = generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>;
 const mockGeneratePreSignedUrls = generatePreSignedUrls as jest.MockedFunction<typeof generatePreSignedUrls>;
@@ -94,8 +94,6 @@ describe('PostServiceImpl', () => {
 
   describe('deletePost', () => {
     it('should delete a post', async () => {
-      (validate as jest.Mock).mockResolvedValue([]);
-      const deletePostSpy = jest.spyOn(postService, 'deletePost');
       const userIdMock: string = 'user 1';
       const postIdMock: string = 'post 1';
       const contentMock: string = 'content post 1';
@@ -106,6 +104,10 @@ describe('PostServiceImpl', () => {
         images: [],
         createdAt: new Date(),
       };
+
+      (validate as jest.Mock).mockResolvedValue([]);
+      const deletePostSpy = jest.spyOn(postService, 'deletePost');
+
       postRepositoryMock.getById.mockResolvedValue(postMock);
 
       postRepositoryMock.delete.mockResolvedValue();

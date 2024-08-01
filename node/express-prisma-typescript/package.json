@@ -11,8 +11,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:make-migrations": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "jest": "jest",
-    "test": "jest"
+    "jest": "jest --Verbose",
+    "test": "jest --Verbose"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
