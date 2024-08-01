@@ -26,35 +26,11 @@ export class ReactionRepositoryImpl implements ReactionRepository {
       },
     });
 
-    if (data.action === ReactionAction.LIKE) {
-      await this.db.post.update({
-        where: {
-          id: data.postId,
-        },
-        data: {
-          qtyLikes: {
-            increment: 1,
-          },
-        },
-      });
-    } else if (data.action === ReactionAction.RETWEET) {
-      await this.db.post.update({
-        where: {
-          id: data.postId,
-        },
-        data: {
-          qtyRetweets: {
-            increment: 1,
-          },
-        },
-      });
-    }
-
     return new ReactionDTO(reaction);
   }
 
   async delete(authorId: string, postId: string, reactionAction: ReactionAction): Promise<void> {
-    const reactionId = await this.db.reaction.findFirst({
+    await this.db.reaction.findFirst({
       where: {
         authorId,
         postId,
@@ -64,35 +40,6 @@ export class ReactionRepositoryImpl implements ReactionRepository {
         id: true,
       },
     });
-
-    const deletedReaction = await this.db.reaction.delete({
-      where: {
-        id: reactionId?.id,
-      },
-    });
-    if (deletedReaction.action === ReactionAction.LIKE) {
-      await this.db.post.update({
-        where: {
-          id: deletedReaction.postId,
-        },
-        data: {
-          qtyLikes: {
-            increment: 1,
-          },
-        },
-      });
-    } else if (deletedReaction.action === ReactionAction.RETWEET) {
-      await this.db.post.update({
-        where: {
-          id: deletedReaction.postId,
-        },
-        data: {
-          qtyRetweets: {
-            increment: 1,
-          },
-        },
-      });
-    }
   }
 
   // make better checks later
@@ -119,8 +66,6 @@ export class ReactionRepositoryImpl implements ReactionRepository {
       },
     });
 
-    // deberia retonar una lista vacia en vez de nulos?
-    // return reactions != null ? reactions.map((reaction) => new ReactionDTO(reaction)) : null;
     return reactions.map((reaction) => new ReactionDTO(reaction));
   }
 
@@ -130,12 +75,10 @@ export class ReactionRepositoryImpl implements ReactionRepository {
         postId,
       },
     });
-    // return reactions != null ? reactions.map((reaction) => new ReactionDTO(reaction)) : null;
     return reactions.map((reaction) => new ReactionDTO(reaction));
   }
 
   async getAllLikesFromUser(userId: string): Promise<ReactionDTO[]> {
-    // return Promise.resolve([]);
     const likes = await this.db.reaction.findMany({
       where: {
         authorId: userId,
@@ -147,7 +90,6 @@ export class ReactionRepositoryImpl implements ReactionRepository {
   }
 
   async getAllRetweetsFromUser(userId: string): Promise<ReactionDTO[]> {
-    // return Promise.resolve([]);
     const retweets = await this.db.reaction.findMany({
       where: {
         authorId: userId,

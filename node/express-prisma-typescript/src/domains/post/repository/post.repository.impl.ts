@@ -1,4 +1,4 @@
-import { PrismaClient, Visibility } from '@prisma/client';
+import { PrismaClient, ReactionAction, Visibility } from '@prisma/client';
 
 import { CursorPagination } from '@types';
 
@@ -18,9 +18,6 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post);
   }
 
-  // All users are currently public, meaning that I can see tweets from anyone, without having to follow them.
-  // Add the ability for users to have private profiles and store it in the User table.
-  // Update the GET api/post to return only posts with public account authors or private account authors that the user follows.
   async getAllByDatePaginated(userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
     const userFollows = await this.db.follow.findMany({
       where: {
@@ -52,6 +49,8 @@ export class PostRepositoryImpl implements PostRepository {
 
       include: {
         author: true,
+        reactions: true,
+        comments: true,
       },
 
       cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
@@ -67,7 +66,13 @@ export class PostRepositoryImpl implements PostRepository {
       ],
     });
 
-    return posts.map((post) => new ExtendedPostDTO(post));
+    return posts.map((post) => {
+      const qtyLikes = post.reactions.filter((reaction) => reaction.action === ReactionAction.LIKE).length;
+      const qtyRetweets = post.reactions.filter((reaction) => reaction.action === ReactionAction.RETWEET).length;
+      const qtyComments = post.comments.length;
+
+      return new ExtendedPostDTO({ ...post, qtyComments, qtyLikes, qtyRetweets });
+    });
   }
 
   async delete(postId: string): Promise<void> {
@@ -94,8 +99,17 @@ export class PostRepositoryImpl implements PostRepository {
       },
       include: {
         author: true,
+        comments: true,
+        reactions: true,
       },
     });
-    return posts.map((post) => new ExtendedPostDTO(post));
+
+    return posts.map((post) => {
+      const qtyLikes = post.reactions.filter((reaction) => reaction.action === ReactionAction.LIKE).length;
+      const qtyRetweets = post.reactions.filter((reaction) => reaction.action === ReactionAction.RETWEET).length;
+      const qtyComments = post.comments.length;
+
+      return new ExtendedPostDTO({ ...post, qtyLikes, qtyRetweets, qtyComments });
+    });
   }
 }

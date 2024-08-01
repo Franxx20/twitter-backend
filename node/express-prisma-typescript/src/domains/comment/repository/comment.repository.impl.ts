@@ -16,17 +16,7 @@ export class CommentRepositoryImpl implements CommentRepository {
         ...data,
       },
     });
-    // Increment the qtyComments field in the parent post
-    await this.db.post.update({
-      where: {
-        id: parentPostId,
-      },
-      data: {
-        qtyComments: {
-          increment: 1,
-        },
-      },
-    });
+
     return new CommentDTO(commentPost);
   }
 
@@ -36,20 +26,9 @@ export class CommentRepositoryImpl implements CommentRepository {
         id: postId,
       },
     });
-    // Increment the qtyComments field in the parent post
-    await this.db.post.update({
-      where: {
-        id: postId,
-      },
-      data: {
-        qtyComments: {
-          decrement: 1,
-        },
-      },
-    });
+
   }
 
-  // TODO CHECK
   async getAllCommentsFromPost(postId: string, options: CursorPagination): Promise<CommentDTO[]> {
     const comments = await this.db.post.findMany({
       cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
@@ -83,7 +62,6 @@ export class CommentRepositoryImpl implements CommentRepository {
   }
 
   async getById(postId: string): Promise<CommentDTO | null> {
-    // return Promise.resolve(undefined);
     const commentPost = await this.db.post.findUnique({
       where: {
         id: postId,
