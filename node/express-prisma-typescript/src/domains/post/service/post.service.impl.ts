@@ -13,6 +13,7 @@ import { PostService } from '.';
 import { validate } from 'class-validator';
 import {
   ForbiddenException,
+  generatePreSignedUrl,
   generatePreSignedUrls,
   InvalidUserException,
   NotFoundException,
@@ -69,6 +70,10 @@ export class PostServiceImpl implements PostService {
     if (!result) {
       throw new InvalidUserException();
     }
+    if (post.images.length) {
+      const preSignedUrls = await generatePreSignedUrls(post.images);
+      post.images = preSignedUrls.map((url) => url.signedUrl);
+    }
 
     return post;
   }
@@ -77,6 +82,17 @@ export class PostServiceImpl implements PostService {
     const posts = await this.repository.getAllByDatePaginated(userId, options);
     if (!posts.length) throw new NotFoundException('posts');
 
+    for (const post of posts) {
+      if (post.images.length) {
+        const preSignedUrls = await generatePreSignedUrls(post.images);
+        post.images = preSignedUrls.map((url) => url.signedUrl);
+      }
+
+      if (post.author.profilePicture) {
+        const preSignedUrl = await generatePreSignedUrl(post.author.profilePicture);
+        post.author.profilePicture = preSignedUrl.signedUrl;
+      }
+    }
     return posts;
   }
 
@@ -95,10 +111,22 @@ export class PostServiceImpl implements PostService {
     if (!result) {
       throw new InvalidUserException();
     }
-    const authors = await this.repository.getByAuthorId(data.authorId);
+    const posts = await this.repository.getByAuthorId(data.authorId);
 
-    if (!authors.length) throw new NotFoundException('authors');
+    if (!posts.length) throw new NotFoundException('authors');
 
-    return authors;
+    for (const post of posts) {
+      if (post.images.length) {
+        const preSignedUrls = await generatePreSignedUrls(post.images);
+        post.images = preSignedUrls.map((url) => url.signedUrl);
+      }
+
+      if (post.author.profilePicture) {
+        const preSignedUrl = await generatePreSignedUrl(post.author.profilePicture);
+        post.author.profilePicture = preSignedUrl.signedUrl;
+      }
+    }
+
+    return posts;
   }
 }

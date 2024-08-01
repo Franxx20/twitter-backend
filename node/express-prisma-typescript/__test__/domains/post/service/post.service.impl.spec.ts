@@ -1,5 +1,11 @@
 import { UserRepositoryImpl } from '@domains/user/repository';
-import { generatePreSignedUrls, NotFoundException, ValidationException } from '@utils';
+import {
+  generatePreSignedUrl,
+  generatePreSignedUrls,
+  InvalidUserException,
+  NotFoundException,
+  ValidationException,
+} from '@utils';
 import { socketIoServer } from '@server';
 import { PostService, PostServiceImpl } from '@domains/post/service';
 import { PostRepositoryImpl } from '@domains/post/repository';
@@ -14,7 +20,8 @@ jest.mock('src/domains/post/repository/post.repository.impl');
 jest.mock('class-validator');
 jest.mock('src/utils/myaws');
 
-// const mockGeneratePreSignedUrl = generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>;
+const mockGeneratePreSignedUrl = generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>;
+const mockGeneratePreSignedUrls = generatePreSignedUrls as jest.MockedFunction<typeof generatePreSignedUrls>;
 const mockValidate = validate as jest.MockedFunction<typeof validate>;
 
 describe('PostServiceImpl', () => {
@@ -181,35 +188,163 @@ describe('PostServiceImpl', () => {
   });
 
   describe('getLatestPosts', () => {
-    it('should ', () => {
-      const authorData: ExtendedUserDTO = {
-        id: 'user123',
-        name: 'John Doe',
-        username: 'johndoe',
-        profilePicture: 'profile.jpg',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        email: 'example@email.com',
-        password: 'exampleHashedPassword',
-        visibility: Visibility.PUBLIC,
+    it('should return list of ExtendedPostDTO with options', async () => {
+      const posts = [
+        {
+          id: 'post1',
+          authorId: 'user123',
+          content: 'Enjoying a sunny day at the beach! ☀️',
+          images: ['beach1.jpg', 'beach2.jpg'],
+          createdAt: new Date('2024-07-30'),
+          author: {
+            id: 'user123',
+            name: 'Alice Johnson',
+            username: 'alice_j',
+            profilePicture: 'alice.jpg',
+            createdAt: new Date('2023-05-10'),
+            updatedAt: new Date('2024-07-20'),
+            email: 'alice@example.com',
+            password: 'hashedPassword123',
+            visibility: Visibility.PUBLIC,
+          },
+          qtyComments: 12,
+          qtyLikes: 35,
+          qtyRetweets: 5,
+        },
+        {
+          id: 'post2',
+          authorId: 'user123',
+          content: 'Just finished reading a great book. Highly recommend it! 📚',
+          images: [],
+          createdAt: new Date('2024-07-25'),
+          author: {
+            id: 'user123',
+            name: 'Alice Johnson',
+            username: 'alice_j',
+            profilePicture: 'alice.jpg',
+            createdAt: new Date('2023-05-10'),
+            updatedAt: new Date('2024-07-20'),
+            email: 'alice@example.com',
+            password: 'hashedPassword123',
+            visibility: Visibility.PUBLIC,
+          },
+          qtyComments: 2,
+          qtyLikes: 8,
+          qtyRetweets: 0,
+        },
+      ];
+
+      const mockOptions = {
+        cursor: null,
+        limit: 2,
       };
-      const extendedPost: ExtendedPostDTO = {
-        id: 'post456',
-        authorId: 'user123',
-        content: 'This is a great post!',
-        images: ['image1.jpg', 'image2.png'],
-        createdAt: new Date(),
-        author: authorData,
-        qtyComments: 5,
-        qtyLikes: 10,
-        qtyRetweets: 2,
-      };
 
+      postRepositoryMock.getAllByDatePaginated.mockResolvedValue(posts);
+      mockGeneratePreSignedUrls.mockResolvedValue([
+        { signedUrl: 'preSignedBeach1.jpg', key: 'beach1.jpg' },
+        { signedUrl: 'preSignedBeach2.jpg', key: 'beach2.jpg' },
+      ]);
+      mockGeneratePreSignedUrl.mockResolvedValue({ signedUrl: 'preSignedAlice.jpg', key: 'alice.jpg' });
 
+      const result = await postService.getLatestPosts('loggedUserId1', mockOptions);
 
+      expect(result).toEqual(
+        posts.map((post) => ({
+          ...post,
+          images: post.images.map((image) => `${image}`),
+          author: {
+            ...post.author,
+            profilePicture: 'preSignedAlice.jpg',
+          },
+        }))
+      );
+    });
+    it('should throw NotFoundException', async () => {
+      const mockedUserId = 'myUserId';
+      const mockedOptions = { limit: 2, after: 'beforeCursorId' };
 
+      postRepositoryMock.getAllByDatePaginated.mockResolvedValue([]);
+      await expect(postService.getLatestPosts(mockedUserId, mockedOptions)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('getPostsByAuthor', () => {});
+  describe('getPostsByAuthor', () => {
+    it('should return a list of ExtendedPostDTO', async () => {
+      // Author 1: Alice Johnson
+      const author1: ExtendedUserDTO = {
+        id: 'user123',
+        name: 'Alice Johnson',
+        username: 'alice_j',
+        profilePicture: 'alice.jpg',
+        createdAt: new Date('2023-05-10'),
+        updatedAt: new Date('2024-07-20'),
+        email: 'alice@example.com',
+        password: 'hashedPassword123',
+        visibility: Visibility.PUBLIC,
+      };
+
+      // Post 1 by Alice
+      const extendedPost1: ExtendedPostDTO = {
+        id: 'post1',
+        authorId: 'user123',
+        content: 'Enjoying a sunny day at the beach! ☀️',
+        images: ['beach1.jpg', 'beach2.jpg'],
+        createdAt: new Date('2024-07-30'),
+        author: author1,
+        qtyComments: 12,
+        qtyLikes: 35,
+        qtyRetweets: 5,
+      };
+
+      // Post 2 by Alice
+      const extendedPost2: ExtendedPostDTO = {
+        id: 'post2',
+        authorId: 'user123',
+        content: 'Just finished reading a great book. Highly recommend it! 📚',
+        images: [],
+        createdAt: new Date('2024-07-25'),
+        author: author1,
+        qtyComments: 2,
+        qtyLikes: 8,
+        qtyRetweets: 0,
+      };
+
+      const loggedUserMockId = 'loggedUserId1';
+      mockValidate.mockResolvedValue([]);
+      userValidationRepositoryMock.isUserPublicOrFollowed.mockResolvedValue(true);
+      postRepositoryMock.getByAuthorId.mockResolvedValue([extendedPost1, extendedPost2]);
+      mockGeneratePreSignedUrls.mockResolvedValue([
+        { signedUrl: 'preSignedBeach1.jpg', key: 'beach1.jpg' },
+        { signedUrl: 'preSignedBeach2.jpg', key: 'beach2.jpg' },
+      ]);
+      mockGeneratePreSignedUrl.mockResolvedValue({ signedUrl: 'preSignedAlice.jpg', key: 'alice.jpg' });
+
+      const results = await postService.getPostsByAuthor(loggedUserMockId, author1.id);
+
+      expect(results).toEqual([extendedPost1, extendedPost2]);
+    });
+
+    it('should throw ValidationException', async () => {
+      const userIdMock: string = '';
+      const validationErrors = [{ property: 'authorId', constraints: { isNotEmpty: 'authorId should not be empty' } }];
+
+      mockValidate.mockResolvedValue(validationErrors);
+      await expect(postService.getPostsByAuthor(userIdMock, 'otherUserId')).rejects.toThrow(ValidationException);
+    });
+
+    it('should throw InvalidUserException if user does not follow the other user', async () => {
+      userValidationRepositoryMock.isUserPublicOrFollowed.mockResolvedValue(false);
+      mockValidate.mockResolvedValue([]);
+
+      await expect(postService.getPostsByAuthor('userMockId', 'otherUserMockId')).rejects.toThrow(InvalidUserException);
+    });
+
+    it('should throw NotFoundException if otheruser does not have any posts', async () => {
+      userValidationRepositoryMock.isUserPublicOrFollowed.mockResolvedValue(true);
+      mockValidate.mockResolvedValue([]);
+      postRepositoryMock.getByAuthorId.mockResolvedValue([]);
+
+      await expect(postService.getPostsByAuthor('userMockId', 'otherUserMockId')).rejects.toThrow(NotFoundException);
+    });
+  });
 });

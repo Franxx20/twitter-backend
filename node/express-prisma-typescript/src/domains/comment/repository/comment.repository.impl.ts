@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ReactionAction } from '@prisma/client';
 
 import { CommentRepository } from '@domains/comment/repository/comment.repository';
 import { CreatePostDTO, ExtendedPostDTO } from '@domains/post/dto';
@@ -26,7 +26,6 @@ export class CommentRepositoryImpl implements CommentRepository {
         id: postId,
       },
     });
-
   }
 
   async getAllCommentsFromPost(postId: string, options: CursorPagination): Promise<CommentDTO[]> {
@@ -43,7 +42,6 @@ export class CommentRepositoryImpl implements CommentRepository {
       },
       where: {
         id: postId,
-
       },
     });
     return comments.map((comment) => new CommentDTO(comment));
@@ -78,9 +76,19 @@ export class CommentRepositoryImpl implements CommentRepository {
       },
       include: {
         author: true,
+        comments: true,
+        reactions: true,
       },
     });
+
     if (postWithAuthor === null) return null;
-    return new ExtendedPostDTO(postWithAuthor);
+
+    const qtyLikes = postWithAuthor.reactions.filter((reaction) => reaction.action === ReactionAction.LIKE).length;
+    const qtyRetweets = postWithAuthor.reactions.filter(
+      (reaction) => reaction.action === ReactionAction.RETWEET
+    ).length;
+    const qtyComments = postWithAuthor.comments.length;
+
+    return new ExtendedPostDTO({ ...postWithAuthor, qtyLikes, qtyRetweets, qtyComments });
   }
 }
