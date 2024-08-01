@@ -4,9 +4,9 @@ name: Node.js CI with Yarn & Jest
 
 on:
   push:
-    branches: ["node"]
+    branches: ["dev"]
   pull_request:
-    branches: ["node"]
+    branches: ["dev"]
 
 jobs:
   build:
