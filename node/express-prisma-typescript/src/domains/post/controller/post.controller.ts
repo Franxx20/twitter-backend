@@ -61,6 +61,7 @@ postRouter.post('/', BodyValidation(CreatePostDTO), async (req: Request, res: Re
   const { userId } = res.locals.context;
   const data = req.body;
   console.log(data);
+  console.log(userId)
 
   try {
     const post = await service.createPost(userId, data.content, data.images);
