@@ -6,7 +6,6 @@ import {
   NotFoundException,
   ValidationException,
 } from '@utils';
-import { socketIoServer } from '@server';
 import { PostService, PostServiceImpl } from '@domains/post/service';
 import { PostRepositoryImpl } from '@domains/post/repository';
 import { ExtendedPostDTO, PostDTO, PreSignedUrl } from '@domains/post/dto';
@@ -35,11 +34,6 @@ describe('PostServiceImpl', () => {
     userValidationRepositoryMock = mock<UserRepositoryImpl>();
     postService = new PostServiceImpl(postRepositoryMock, userValidationRepositoryMock);
     jest.resetAllMocks(); // Reset mocks before each test
-  });
-
-  afterAll((done) => {
-    socketIoServer.closeServerConnection();
-    done();
   });
 
   describe('createPost', () => {

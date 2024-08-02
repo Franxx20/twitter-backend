@@ -13,7 +13,6 @@ import { LoginInputDTO, SignupInputDTO, TokenDTO } from '@domains/auth/dto';
 import { AuthService, AuthServiceImpl } from '@domains/auth/service';
 import { Visibility } from '@prisma/client';
 import { ExtendedUserDTO } from '@domains/user/dto';
-import { socketIoServer } from '@server';
 
 jest.mock('src/domains/user/repository/user.repository.impl');
 jest.mock('class-validator');
@@ -26,12 +25,6 @@ describe('Auth Service Impl', () => {
   beforeEach(() => {
     userRepositoryMock = new UserRepositoryImpl(db) as jest.Mocked<UserRepositoryImpl>;
     authService = new AuthServiceImpl(userRepositoryMock);
-  });
-
-  afterAll((done) => {
-    socketIoServer.closeServerConnection();
-
-    done();
   });
 
   describe('signup', () => {

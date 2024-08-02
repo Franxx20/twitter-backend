@@ -21,7 +21,7 @@ export class Constants {
   static LOG_LEVEL: LogLevel = (process.env.LOG_LEVEL as LogLevel) || LogLevel.INFO;
 
   // Port to run the server in
-  static PORT: string = process.env.PORT ?? '';
+  static PORT: string = process.env.PORT as string;
 
   // CORS urls to allow
   static CORS_WHITELIST: string = process.env.CORS_WHITELIST ?? '*';

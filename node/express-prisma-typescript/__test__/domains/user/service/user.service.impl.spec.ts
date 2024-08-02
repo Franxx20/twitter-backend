@@ -3,7 +3,6 @@ import { UserRepositoryImpl } from '@domains/user/repository';
 import { db, encryptPassword, generatePreSignedUrl, NotFoundException } from '@utils';
 import { UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '@domains/user/dto';
 import { Visibility } from '@prisma/client';
-import {socketIoServer} from '@server';
 
 
 jest.mock('src/domains/user/repository/user.repository.impl');
@@ -21,11 +20,6 @@ describe('UserServiceImpl', () => {
     userRepositoryMock = new UserRepositoryImpl(db) as jest.Mocked<UserRepositoryImpl>;
     userService = new UserServiceImpl(userRepositoryMock);
     jest.resetAllMocks();
-  });
-
-  afterAll((done) => {
-    socketIoServer.closeServerConnection()
-    done();
   });
 
   describe('getUser', () => {

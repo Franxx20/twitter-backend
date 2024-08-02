@@ -5,7 +5,6 @@ import {
   NotFoundException,
   ValidationException,
 } from '@utils';
-import { socketIoServer } from '@server';
 import { FollowerService, FollowerServiceImpl } from '@domains/follower/service';
 import { FollowerRepositoryImpl } from '@domains/follower/repository';
 import { _MockProxy } from 'jest-mock-extended/lib/Mock';
@@ -30,11 +29,6 @@ describe('follow service impl', () => {
     followRepositoryMock = mock<FollowerRepositoryImpl>();
     followService = new FollowerServiceImpl(followRepositoryMock);
     jest.resetAllMocks();
-  });
-
-  afterAll((done) => {
-    socketIoServer.closeServerConnection();
-    done();
   });
 
   describe('createFollower', () => {
