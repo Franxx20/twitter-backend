@@ -13,8 +13,8 @@ generator client {
 // You can find more about datasources here: https://www.prisma.io/docs/concepts/components/prisma-schema/data-sources
 datasource db {
   provider = "postgresql"
-  // url      = env("DATABASE_URL")
-  url      = env("DOCKER_DATABASE_URL")
+  url      = env("DATABASE_URL")
+  // url      = env("DOCKER_DATABASE_URL")
 }
 
 enum Visibility {
