@@ -30,7 +30,6 @@ export class PostServiceImpl implements PostService {
 
     if (data.images?.length) {
       const urls: PreSignedUrl[] = await generatePreSignedUrls(data.images);
-      console.log(urls);
       data.images = urls.map((url) => url.key);
     }
     return await this.repository.create(data);

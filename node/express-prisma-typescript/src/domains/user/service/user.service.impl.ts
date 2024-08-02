@@ -28,7 +28,7 @@ export class UserServiceImpl implements UserService {
     const user = await this.repository.getById(userId);
     if (!user) throw new NotFoundException('user');
 
-    console.log(userUpdateData);
+    // console.log(userUpdateData);
     if (userUpdateData.password) {
       userUpdateData.password = await encryptPassword(userUpdateData.password)
     }
