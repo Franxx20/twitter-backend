@@ -27,7 +27,7 @@ export class SocketIoServer {
     const io = new Server(this.httpServer, {
       cors: {
         origin: Constants.CORS_WHITELIST,
-        methods: ['GET', 'POST'],
+        methods: ['*'],
       },
       connectionStateRecovery: {},
     });

@@ -60,8 +60,8 @@ postRouter.get('/by_user/:userId', async (req: Request, res: Response, next: Nex
 postRouter.post('/', BodyValidation(CreatePostDTO), async (req: Request, res: Response, next: NextFunction) => {
   const { userId } = res.locals.context;
   const data = req.body;
-  console.log(data);
-  console.log(userId)
+  console.log(`data is${data as string}`);
+  console.log(`userId: ${userId as string}`)
 
   try {
     const post = await service.createPost(userId, data.content, data.images);
