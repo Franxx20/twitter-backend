@@ -1,9 +1,10 @@
-import { NotFoundException } from '@utils/errors';
+import { ForbiddenException, NotFoundException } from '@utils/errors';
 import { OffsetPagination } from 'types';
 import { UserDTO, UserUpdateInputDTO, UserUpdateOutputDTO, UserViewDTO } from '../dto';
 import { UserRepository } from '../repository';
 import { UserService } from './user.service';
-import {  db, encryptPassword, generatePreSignedUrl } from '@utils';
+import { encryptPassword, generatePreSignedUrl } from '@utils';
+import { isUUID } from 'class-validator';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly repository: UserRepository) {}
@@ -30,7 +31,7 @@ export class UserServiceImpl implements UserService {
 
     // console.log(userUpdateData);
     if (userUpdateData.password) {
-      userUpdateData.password = await encryptPassword(userUpdateData.password)
+      userUpdateData.password = await encryptPassword(userUpdateData.password);
     }
     if (userUpdateData.profilePicture) {
       const preSignedUrl = await generatePreSignedUrl(userUpdateData.profilePicture);
@@ -46,12 +47,17 @@ export class UserServiceImpl implements UserService {
   }
 
   async isUserFollowed(followerID: string, followedID: string): Promise<boolean> {
-    const follow = await db.follow.findFirst({
-      where: {
-        followerId: followerID,
-        followedId: followedID,
-      },
-    });
-    return follow !== null;
+    if (!isUUID(followerID) || !isUUID(followedID)) return false;
+
+    const follow = await this.repository.isUserFollowed(followerID, followedID);
+    if (!follow) throw new ForbiddenException();
+
+    return true;
+  }
+
+  async checkIfUserExists(userId: string): Promise<boolean> {
+    if (!isUUID(userId)) return false;
+
+    return await this.repository.checkIfUserExists(userId);
   }
 }

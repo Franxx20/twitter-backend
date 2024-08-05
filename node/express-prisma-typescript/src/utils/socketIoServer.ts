@@ -61,28 +61,33 @@ export class SocketIoServer {
       console.log(socket.rooms);
 
       socket.on('message', async ({ receiverId, content }): Promise<void> => {
-        const senderId = socket.data.userId;
+        try {
+          const senderId = socket.data.userId;
 
-        if (await this.userValidationService.isUserFollowed(senderId, receiverId)) {
-          io.to(receiverId).to(senderId).emit('message', {
-            content,
-            senderId,
-            receiverId,
-          });
+          if (await this.userValidationService.checkIfUserExists(receiverId)) {
+            if (await this.userValidationService.isUserFollowed(senderId, receiverId)) {
+              io.to(receiverId).to(senderId).emit('message', {
+                content,
+                senderId,
+                receiverId,
+              });
 
-          const data = new MessageDTO({ senderId, receiverId, content });
-          await this.messageService.create(data);
-        } else {
-          throw new ForbiddenException();
+              const data = new MessageDTO({ senderId, receiverId, content });
+              await this.messageService.create(data);
+            } else {
+              throw new ForbiddenException();
+            }
+          } else {
+            throw new NotFoundException('user not found');
+          }
+        } catch (error) {
+          console.error('Error handling message event:', error);
+          if (error instanceof ForbiddenException || error instanceof NotFoundException) {
+            socket.emit('error', { message: error.message });
+          } else {
+            socket.emit('error', { message: 'Internal server error' });
+          }
         }
-      });
-
-      socket.on('disconnect', (reason) => {
-        console.log(`socket ${socket.id} disconnected due to ${reason}`);
-        const senderId = socket.data.userId;
-        socket.broadcast.emit('user disconnected', {
-          userId: senderId,
-        });
       });
     });
   }

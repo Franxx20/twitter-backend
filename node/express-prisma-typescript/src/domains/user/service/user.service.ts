@@ -9,4 +9,5 @@ export interface UserService {
   getUsersContainsUsername: (username: string) => Promise<UserViewDTO[]>;
 
   isUserFollowed: (followerID: string, followedID: string) => Promise<boolean>;
+  checkIfUserExists: (userId: string) => Promise<boolean>;
 }

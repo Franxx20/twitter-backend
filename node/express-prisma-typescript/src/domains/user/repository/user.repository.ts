@@ -14,4 +14,5 @@ export interface UserRepository {
 
   isUserPublicOrFollowed: (followerID: string, followedID: string) => Promise<boolean>;
   isUserFollowed: (followerID: string, followedID: string) => Promise<boolean>;
+  checkIfUserExists: (userId: string) => Promise<boolean>;
 }

@@ -174,6 +174,15 @@ export class UserRepositoryImpl implements UserRepository {
       },
     });
 
-    return follow !== null;
+    return !!follow;
+  }
+
+  async checkIfUserExists(userId: string): Promise<boolean> {
+    const user = await db.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    return !!user;
   }
 }
