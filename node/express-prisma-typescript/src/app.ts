@@ -4,13 +4,17 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { router } from '@router';
+import { setupSwagger } from '@utils/swagger';
 
 export const app = express();
+
 
 // Set up request logger
 if (Constants.NODE_ENV === NodeEnv.DEV) {
   app.use(morgan('tiny')); // Log requests only in development environments
 }
+
+setupSwagger(app)
 
 // Set up request parsers
 app.use(express.json()); // Parses application/json payloads request bodies

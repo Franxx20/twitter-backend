@@ -12,7 +12,8 @@ export class PostRepositoryImpl implements PostRepository {
     const post = await this.db.post.create({
       data: {
         authorId: postData.userId,
-        ...postData,
+        content: postData.content,
+        images: postData.images
       },
     });
     return new PostDTO(post);

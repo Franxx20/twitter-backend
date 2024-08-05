@@ -1,4 +1,6 @@
 // Runtime environments
+import * as process from 'node:process';
+
 export enum NodeEnv {
   DEV = 'development',
   PROD = 'production',
@@ -21,7 +23,7 @@ export class Constants {
   static LOG_LEVEL: LogLevel = (process.env.LOG_LEVEL as LogLevel) || LogLevel.INFO;
 
   // Port to run the server in
-  static PORT: string = process.env.PORT as string;
+  static PORT: string = process.env.PORT ?? '8080';
 
   // CORS urls to allow
   static CORS_WHITELIST: string = process.env.CORS_WHITELIST ?? '*';
@@ -37,4 +39,6 @@ export class Constants {
   static SECRET_ACCESS_KEY: string = process.env.SECRET_ACCESS_KEY ?? 'defaultSecretAccessKey';
 
   static PRE_SIGNED_URL_LIFETIME: number = 60 * 5;
+
+  static DEPLOY_URL: string = process.env.DEPLOY_URL ?? '';
 }

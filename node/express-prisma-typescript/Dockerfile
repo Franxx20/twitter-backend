@@ -37,6 +37,8 @@ FROM node:18-alpine AS dev
 
 WORKDIR /app
 
+EXPOSE 8080
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./
 COPY nodemon.json ./nodemon.json

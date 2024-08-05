@@ -2,12 +2,12 @@ import { PostDTO } from '@domains/post/dto';
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CommentDTO extends PostDTO {
-  constructor(comment: PostDTO) {
+  constructor(comment: CommentDTO) {
     super(comment);
-    this.parentPostId = comment.id;
+    this.parentPostId = comment.parentPostId;
   }
 
-  parentPostId!: string;
+  parentPostId: string | null;
 }
 
 export class DeleteCommentDTO {

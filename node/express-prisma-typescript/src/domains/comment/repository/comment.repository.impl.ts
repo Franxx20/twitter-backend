@@ -1,19 +1,20 @@
 import { PrismaClient, ReactionAction } from '@prisma/client';
 
 import { CommentRepository } from '@domains/comment/repository/comment.repository';
-import { CreatePostDTO, ExtendedPostDTO } from '@domains/post/dto';
+import { ExtendedPostDTO, PostContentDTO } from '@domains/post/dto';
 import { CommentDTO } from '@domains/comment/dto';
 import { CursorPagination } from '@types';
 
 export class CommentRepositoryImpl implements CommentRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async create(authorId: string, parentPostId: string, data: CreatePostDTO): Promise<CommentDTO> {
+  async create(authorId: string, parentPostId: string, data: PostContentDTO): Promise<CommentDTO> {
     const commentPost = await this.db.post.create({
       data: {
-        authorId,
+        authorId: authorId,
         parentPostId,
-        ...data,
+        content: data.content,
+        images: data.images,
       },
     });
 
@@ -41,7 +42,7 @@ export class CommentRepositoryImpl implements CommentRepository {
         },
       },
       where: {
-        id: postId,
+        parentPostId: postId,
       },
     });
     return comments.map((comment) => new CommentDTO(comment));
@@ -90,5 +91,25 @@ export class CommentRepositoryImpl implements CommentRepository {
     const qtyComments = postWithAuthor.comments.length;
 
     return new ExtendedPostDTO({ ...postWithAuthor, qtyLikes, qtyRetweets, qtyComments });
+  }
+
+  async checkIfAuthorExists(authorId: string): Promise<boolean> {
+    const author = await this.db.user.findUnique({
+      where: {
+        id: authorId,
+      },
+    });
+
+    return !!author;
+  }
+
+  async checkIfParentPostExists(postId: string): Promise<boolean> {
+    const post = await this.db.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+
+    return !!post;
   }
 }

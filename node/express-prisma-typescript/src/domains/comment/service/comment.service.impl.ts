@@ -3,7 +3,7 @@ import { CommentRepository } from '@domains/comment/repository/comment.repositor
 import { CommentService } from '@domains/comment/service/comment.service';
 
 import { validate } from 'class-validator';
-import { CreatePostDTO, ExtendedPostDTO } from '@domains/post/dto';
+import { ExtendedPostDTO, PostContentDTO } from '@domains/post/dto';
 import {
   CommentDTO,
   DeleteCommentDTO,
@@ -21,7 +21,9 @@ export class CommentServiceImpl implements CommentService {
     private readonly userValidationRepository: UserRepository
   ) {}
 
-  async createComment(userId: string, parentPostId: string, data: CreatePostDTO): Promise<CommentDTO> {
+
+  // TODO UPDATE SWAGGER
+  async createComment(userId: string, parentPostId: string, data: PostContentDTO): Promise<CommentDTO> {
     const errors = await validate(data, {
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -30,6 +32,9 @@ export class CommentServiceImpl implements CommentService {
     if (errors.length > 0) {
       throw new ValidationException(errors.map((error) => ({ ...error, target: undefined, value: undefined })));
     }
+
+    if(!await this.repository.checkIfAuthorExists(userId))throw new NotFoundException('user does not exists');
+    if(!await this.repository.checkIfParentPostExists(parentPostId))throw new NotFoundException('post does not exists');
 
     return await this.repository.create(userId, parentPostId, data);
   }
@@ -64,9 +69,11 @@ export class CommentServiceImpl implements CommentService {
 
     const comment = await this.repository.getById(postId);
     if (!comment) throw new NotFoundException('comment');
+    if (comment.parentPostId === null || comment.parentPostId === undefined)
+      throw new NotFoundException('this is not a comment');
+    console.log(comment);
 
     const result = await this.userValidationRepository.isUserPublicOrFollowed(userId, comment.authorId);
-    console.log(result);
     if (!result) throw new InvalidUserException();
 
     return comment;

@@ -5,6 +5,17 @@ import 'express-async-errors';
 
 export const healthRouter = Router();
 
+/**
+ * @openapi
+ * /health:
+ *  get:
+ *    tags:
+ *      - Healthcheck
+ *    description: Responds if the app is up and running
+ *    responses:
+ *      200:
+ *        description: App is up and running
+ */
 healthRouter.get('/', (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).send();
 });

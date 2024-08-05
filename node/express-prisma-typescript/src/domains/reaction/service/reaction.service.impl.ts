@@ -31,10 +31,10 @@ export class ReactionServiceImpl implements ReactionService {
 
     if (!(await this.repository.userExists(data.userId))) throw new NotFoundException('user not found');
 
-    if (await this.repository.reactionAlreadyExists(data.userId, data.postId, data.action))
+    if (await this.repository.checkReactionExists(data.userId, data.postId, data.action))
       throw new ConflictException('reaction already Exists');
 
-    return await this.repository.create(data.userId, data);
+    return await this.repository.create(data);
   }
 
   async deleteReaction(data: DeleteReactionDTO): Promise<void> {
@@ -51,7 +51,7 @@ export class ReactionServiceImpl implements ReactionService {
 
     if (!(await this.repository.userExists(data.userId))) throw new NotFoundException('user not found');
 
-    if (!await this.repository.reactionAlreadyExists(data.userId, data.postId, data.action))
+    if (!(await this.repository.checkReactionExists(data.userId, data.postId, data.action)))
       throw new ConflictException('reaction does not Exists');
 
     await this.repository.delete(data.userId, data.postId, data.action);

@@ -29,7 +29,6 @@ export class SocketIoServer {
         origin: Constants.CORS_WHITELIST,
         methods: ['*'],
       },
-      connectionStateRecovery: {},
     });
 
     io.use((socket, next): void => {

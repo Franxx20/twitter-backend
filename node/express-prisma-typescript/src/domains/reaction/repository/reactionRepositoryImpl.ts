@@ -6,19 +6,20 @@ import { CreateReactionDTO, ReactionDTO } from '../dto';
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async create(authorId: string, data: CreateReactionDTO): Promise<ReactionDTO> {
+  async create(data: CreateReactionDTO): Promise<ReactionDTO> {
     const reaction = await this.db.reaction.create({
       data: {
-        authorId,
-        ...data,
+        authorId: data.userId,
+        postId: data.postId,
+        action: data.action,
       },
     });
 
     return new ReactionDTO(reaction);
   }
 
-  async delete(authorId: string, postId: string, reactionAction: ReactionAction): Promise<void> {
-    await this.db.reaction.findFirst({
+  async delete(authorId: string, postId: string, reactionAction: ReactionAction): Promise<boolean> {
+    const reactionToDelete = await this.db.reaction.findFirst({
       where: {
         authorId,
         postId,
@@ -28,6 +29,15 @@ export class ReactionRepositoryImpl implements ReactionRepository {
         id: true,
       },
     });
+    if (!reactionToDelete) return false;
+
+    await this.db.reaction.delete({
+      where: {
+        id: reactionToDelete.id,
+      },
+    });
+
+    return true;
   }
 
   // make better checks later
@@ -101,7 +111,7 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     return authorId.authorId;
   }
 
-  async reactionAlreadyExists(authorId: string, postId: string, reactionAction: ReactionAction): Promise<boolean> {
+  async checkReactionExists(authorId: string, postId: string, reactionAction: ReactionAction): Promise<boolean> {
     const oldReaction = await this.db.reaction.findFirst({
       where: {
         authorId,

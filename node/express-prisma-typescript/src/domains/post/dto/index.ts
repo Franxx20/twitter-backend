@@ -26,6 +26,25 @@ export class CreatePostDTO {
   images?: string[];
 }
 
+export class PostContentDTO {
+  constructor(content: string, images?: string[]) {
+    this.content = content;
+    this.images = images;
+  }
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(240)
+  content!: string;
+
+  @IsOptional()
+  @ArrayMaxSize(4)
+  @MaxLength(100, {
+    each: true,
+  })
+  images?: string[];
+}
+
 export class PostDTO {
   constructor(post: PostDTO) {
     this.id = post.id;
