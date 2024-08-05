@@ -42,7 +42,7 @@ export class SocketIoServer {
           const decodedToken = context as JwtPayload;
           socket.data.userId = decodedToken.userId;
           if (socket.data.userId === null || socket.data.userId === undefined) {
-            throw new NotFoundException('MISSING USER ID');
+            next(new NotFoundException('MISSING USER ID'));
           }
           next();
         });

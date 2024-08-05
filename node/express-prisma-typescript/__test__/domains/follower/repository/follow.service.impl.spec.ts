@@ -1,10 +1,4 @@
-import {
-  ConflictException,
-  encryptPassword,
-  generatePreSignedUrl,
-  NotFoundException,
-  ValidationException,
-} from '@utils';
+import { ConflictException, NotFoundException, ValidationException } from '@utils';
 import { FollowerService, FollowerServiceImpl } from '@domains/follower/service';
 import { FollowerRepositoryImpl } from '@domains/follower/repository';
 import { _MockProxy } from 'jest-mock-extended/lib/Mock';
@@ -16,8 +10,6 @@ jest.mock('src/domains/post/repository/post.repository.impl');
 jest.mock('class-validator');
 jest.mock('src/utils/s3Bucket');
 
-const mockEncryptPassword = encryptPassword as jest.MockedFunction<typeof encryptPassword>;
-const mockGeneratePreSignedUrl = generatePreSignedUrl as jest.MockedFunction<typeof generatePreSignedUrl>;
 const mockValidate = validate as jest.MockedFunction<typeof validate>;
 
 describe('follow service impl', () => {
